@@ -30,11 +30,9 @@ molecule:
       - image: "fedora"
         tag: "latest"
       - image: "ubuntu"
-        tag: "latest"
-      - image: "ubuntu"
         tag: "jammy"
       - image: "ubuntu"
-        tag: "focal"
+        tag: "latest"
 
 galaxy:
   image: python:3.13

@@ -22,7 +22,8 @@ galaxy_info:
         - all
     - name: Ubuntu
       versions:
-        - all
+        - jammy
+        - noble
 
   galaxy_tags:
     - openbao
