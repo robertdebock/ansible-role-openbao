@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: robertdebock.openbao
+      openbao_storage:
+        type: raft
+        path: /opt/openbao/data
+        node_id: node1
+        retry_join:
+          - leader_api_addr: "http://127.0.0.2:8200"
+      openbao_cluster_addr: "https://127.0.0.1:8201"
+      openbao_api_addr: "https://127.0.0.1:8200"
+      openbao_listeners:
+        - name: tcp
+          address: "127.0.0.1:8200"
+          tls_disable: true
+      openbao_telemetry:
+        prometheus_retention_time: "30s"
+        disable_hostname: true
+      openbao_log_requests_level: "info"

@@ -1,0 +1,8 @@
+---
+#
+# Ansible managed
+#
+repository:
+  description: Install and configure openbao on your system.
+  homepage: https://robertdebock.nl/
+  topics: openbao, application, cloud, database, infrastructure, linux, storage, security, system, tools, ansible, molecule, tox, playbook

@@ -1,0 +1,20 @@
+---
+#
+# Ansible managed
+#
+
+name: "TODO 2 Issue"
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - name: "TODO to Issue"
+        uses: "alstr/todo-to-issue-action@v4"
+        id: "todo"
+        with:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
