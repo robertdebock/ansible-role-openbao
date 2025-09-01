@@ -92,7 +92,7 @@
     - openbao_tls.cert_content is defined
     - openbao_tls.cert_content | length > 0
   notify:
-    - Restart OpenBao
+    - Reload OpenBao
 
 - name: Deploy TLS private key
   ansible.builtin.copy:
@@ -107,7 +107,7 @@
     - openbao_tls.key_content is defined
     - openbao_tls.key_content | length > 0
   notify:
-    - Restart OpenBao
+    - Reload OpenBao
 
 - name: Deploy TLS CA certificate
   ansible.builtin.copy:
@@ -122,4 +122,4 @@
     - openbao_tls.ca_content is defined
     - openbao_tls.ca_content | length > 0
   notify:
-    - Restart OpenBao
+    - Reload OpenBao
