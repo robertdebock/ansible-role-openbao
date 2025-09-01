@@ -22,3 +22,10 @@
         prometheus_retention_time: "30s"
         disable_hostname: true
       openbao_log_requests_level: "info"
+      openbao_audit_devices:
+        - type: file
+          path: "audit"
+          description: "Audit logs to file"
+          options:
+            file_path: "/var/log/openbao-audit.log"
+            log_raw: false

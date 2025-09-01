@@ -35,6 +35,13 @@ This example is taken from [`molecule/default/converge.yml`](https://github.com/
         prometheus_retention_time: "30s"
         disable_hostname: true
       openbao_log_requests_level: "info"
+      openbao_audit_devices:
+        - type: file
+          path: "audit"
+          description: "Audit logs to file"
+          options:
+            file_path: "/var/log/openbao-audit.log"
+            log_raw: false
 ```
 
 The machine needs to be prepared. In CI this is done using [`molecule/default/prepare.yml`](https://github.com/robertdebock/ansible-role-openbao/blob/master/molecule/default/prepare.yml):
@@ -267,6 +274,56 @@ openbao_telemetry: {}
 ##
 ## Valid levels: error, warn, info, debug, trace, off
 openbao_log_requests_level: "off"
+
+## Audit device configuration for OpenBao.
+## Audit devices provide detailed logs of all requests and responses to OpenBao.
+## Multiple audit devices can be configured to log to different destinations.
+##
+## Example for file audit device:
+## openbao_audit_devices:
+##   - type: file
+##     path: "audit"
+##     description: "Audit logs to file"
+##     options:
+##       file_path: "/var/log/openbao/audit.log"
+##       log_raw: false
+##
+## Example for syslog audit device:
+## openbao_audit_devices:
+##   - type: syslog
+##     path: "syslog"
+##     description: "Audit logs to syslog"
+##     options:
+##       facility: "AUTH"
+##       tag: "openbao"
+##       log_raw: false
+##
+## Example for socket audit device:
+## openbao_audit_devices:
+##   - type: socket
+##     path: "socket"
+##     description: "Audit logs to socket"
+##     options:
+##       address: "127.0.0.1:9000"
+##       socket_type: "tcp"
+##       log_raw: false
+##
+## Example for multiple audit devices:
+## openbao_audit_devices:
+##   - type: file
+##     path: "file-audit"
+##     description: "File audit device"
+##     options:
+##       file_path: "/var/log/openbao/audit.log"
+##       log_raw: false
+##   - type: syslog
+##     path: "syslog-audit"
+##     description: "Syslog audit device"
+##     options:
+##       facility: "AUTH"
+##       tag: "openbao"
+##       log_raw: false
+openbao_audit_devices: []
 
 ## TLS certificate management for OpenBao.
 ## When this map is populated, the role will manage TLS certificates.

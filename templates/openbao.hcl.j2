@@ -179,6 +179,48 @@ seal "{{ seal.name }}" {
 {% endfor %}
 {% endif %}
 
+{% if openbao_audit_devices | length > 0 %}
+{% for audit in openbao_audit_devices %}
+audit "{{ audit.type }}" "{{ audit.path }}" {
+{% if audit.description is defined %}
+  description = "{{ audit.description }}"
+{% endif %}
+{% if audit.options is defined %}
+  options {
+{% if audit.type == 'file' %}
+{% if audit.options.file_path is defined %}
+    file_path = "{{ audit.options.file_path }}"
+{% endif %}
+{% if audit.options.log_raw is defined %}
+    log_raw = {{ audit.options.log_raw | ternary('true', 'false') }}
+{% endif %}
+{% elif audit.type == 'syslog' %}
+{% if audit.options.facility is defined %}
+    facility = "{{ audit.options.facility }}"
+{% endif %}
+{% if audit.options.tag is defined %}
+    tag = "{{ audit.options.tag }}"
+{% endif %}
+{% if audit.options.log_raw is defined %}
+    log_raw = {{ audit.options.log_raw | ternary('true', 'false') }}
+{% endif %}
+{% elif audit.type == 'socket' %}
+{% if audit.options.address is defined %}
+    address = "{{ audit.options.address }}"
+{% endif %}
+{% if audit.options.socket_type is defined %}
+    socket_type = "{{ audit.options.socket_type }}"
+{% endif %}
+{% if audit.options.log_raw is defined %}
+    log_raw = {{ audit.options.log_raw | ternary('true', 'false') }}
+{% endif %}
+{% endif %}
+  }
+{% endif %}
+}
+{% endfor %}
+{% endif %}
+
 {% if openbao_telemetry | length > 0 %}
 telemetry {
 {% if openbao_telemetry.usage_gauge_period is defined %}

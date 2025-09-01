@@ -225,6 +225,88 @@ argument_specs:
             type: "str"
             required: false
             description: "Key name for Transit seal."
+          # AliCloud KMS parameters
+          key_id:
+            type: "str"
+            required: false
+            description: "Key ID for AliCloud KMS seal."
+          # Azure Key Vault parameters
+          tenant_id:
+            type: "str"
+            required: false
+            description: "Tenant ID for Azure Key Vault seal."
+          client_id:
+            type: "str"
+            required: false
+            description: "Client ID for Azure Key Vault seal."
+          client_secret:
+            type: "str"
+            required: false
+            description: "Client secret for Azure Key Vault seal."
+          vault_name:
+            type: "str"
+            required: false
+            description: "Vault name for Azure Key Vault seal."
+          # GCP Cloud KMS parameters
+          credentials:
+            type: "str"
+            required: false
+            description: "Path to credentials file for GCP Cloud KMS seal."
+          project:
+            type: "str"
+            required: false
+            description: "Project ID for GCP Cloud KMS seal."
+          key_ring:
+            type: "str"
+            required: false
+            description: "Key ring for GCP Cloud KMS seal."
+          crypto_key:
+            type: "str"
+            required: false
+            description: "Crypto key for GCP Cloud KMS seal."
+          # KMIP parameters
+          server:
+            type: "str"
+            required: false
+            description: "Server address for KMIP seal."
+          certificate:
+            type: "str"
+            required: false
+            description: "Certificate path for KMIP seal."
+          key:
+            type: "str"
+            required: false
+            description: "Key path for KMIP seal."
+          ca_cert:
+            type: "str"
+            required: false
+            description: "CA certificate path for KMIP seal."
+          # OCI KMS parameters
+          auth_type:
+            type: "str"
+            required: false
+            description: "Authentication type for OCI KMS seal."
+          crypto_endpoint:
+            type: "str"
+            required: false
+            description: "Crypto endpoint for OCI KMS seal."
+          # PKCS#11 parameters
+          lib:
+            type: "str"
+            required: false
+            description: "PKCS#11 library path."
+          slot:
+            type: "str"
+            required: false
+            description: "PKCS#11 slot number."
+          pin:
+            type: "str"
+            required: false
+            description: "PKCS#11 PIN."
+          key_label:
+            type: "str"
+            required: false
+            description: "PKCS#11 key label."
       openbao_telemetry:
         type: "dict"
         required: false
@@ -315,89 +397,6 @@ argument_specs:
             type: "bool"
             required: false
             description: "Enable Stackdriver debug logs."
-          # AliCloud KMS parameters
-          key_id:
-            type: "str"
-            required: false
-            description: "Key ID for AliCloud KMS seal."
-          # Azure Key Vault parameters
-          tenant_id:
-            type: "str"
-            required: false
-            description: "Tenant ID for Azure Key Vault seal."
-          client_id:
-            type: "str"
-            required: false
-            description: "Client ID for Azure Key Vault seal."
-          client_secret:
-            type: "str"
-            required: false
-            description: "Client secret for Azure Key Vault seal."
-          vault_name:
-            type: "str"
-            required: false
-            description: "Vault name for Azure Key Vault seal."
-          # GCP Cloud KMS parameters
-          credentials:
-            type: "str"
-            required: false
-            description: "Path to credentials file for GCP Cloud KMS seal."
-          project:
-            type: "str"
-            required: false
-            description: "Project ID for GCP Cloud KMS seal."
-          key_ring:
-            type: "str"
-            required: false
-            description: "Key ring for GCP Cloud KMS seal."
-          crypto_key:
-            type: "str"
-            required: false
-            description: "Crypto key for GCP Cloud KMS seal."
-          # KMIP parameters
-          server:
-            type: "str"
-            required: false
-            description: "Server address for KMIP seal."
-          certificate:
-            type: "str"
-            required: false
-            description: "Certificate path for KMIP seal."
-          key:
-            type: "str"
-            required: false
-            description: "Key path for KMIP seal."
-
-          ca_cert:
-            type: "str"
-            required: false
-            description: "CA certificate path for KMIP seal."
-          # OCI KMS parameters
-          auth_type:
-            type: "str"
-            required: false
-            description: "Authentication type for OCI KMS seal."
-          crypto_endpoint:
-            type: "str"
-            required: false
-            description: "Crypto endpoint for OCI KMS seal."
-          # PKCS#11 parameters
-          lib:
-            type: "str"
-            required: false
-            description: "PKCS#11 library path."
-          slot:
-            type: "str"
-            required: false
-            description: "PKCS#11 slot number."
-          pin:
-            type: "str"
-            required: false
-            description: "PKCS#11 PIN."
-          key_label:
-            type: "str"
-            required: false
-            description: "PKCS#11 key label."
       openbao_log_requests_level:
         type: "str"
         required: false
@@ -410,3 +409,115 @@ argument_specs:
           - trace
           - "off"
         description: "Logging level for completed requests (default: off)."
+      openbao_audit_devices:
+        type: "list"
+        required: false
+        default: []
+        description: "List of audit device configurations for OpenBao."
+        elements: "dict"
+        options:
+          type:
+            type: "str"
+            required: true
+            choices:
+              - file
+              - syslog
+              - socket
+            description: "Type of audit device (file, syslog, or socket)."
+          path:
+            type: "str"
+            required: true
+            description: "Path/name for the audit device."
+          description:
+            type: "str"
+            required: false
+            description: "Description of the audit device."
+          options:
+            type: "dict"
+            required: false
+            description: "Options specific to the audit device type."
+            options:
+              # File audit device options
+              file_path:
+                type: "str"
+                required: false
+                description: "File path for file audit device."
+              log_raw:
+                type: "bool"
+                required: false
+                description: "Whether to log raw data."
+              # Syslog audit device options
+              facility:
+                type: "str"
+                required: false
+                description: "Syslog facility (e.g., AUTH, LOCAL0)."
+              tag:
+                type: "str"
+                required: false
+                description: "Tag for syslog messages."
+              # Socket audit device options
+              address:
+                type: "str"
+                required: false
+                description: "Address for socket audit device (e.g., 127.0.0.1:9000)."
+              socket_type:
+                type: "str"
+                required: false
+                choices:
+                  - tcp
+                  - udp
+                description: "Socket type for socket audit device."
+      openbao_tls:
+        type: "dict"
+        required: false
+        default: {}
+        description: "TLS certificate management for OpenBao."
+        options:
+          directory:
+            type: "str"
+            required: false
+            description: "Directory to store TLS certificates."
+          cert_file:
+            type: "str"
+            required: false
+            description: "Certificate filename."
+          key_file:
+            type: "str"
+            required: false
+            description: "Private key filename."
+          ca_file:
+            type: "str"
+            required: false
+            description: "CA certificate filename."
+          cert_content:
+            type: "str"
+            required: false
+            description: "Certificate content."
+          key_content:
+            type: "str"
+            required: false
+            description: "Private key content."
+          ca_content:
+            type: "str"
+            required: false
+            description: "CA certificate content."
+          owner:
+            type: "str"
+            required: false
+            description: "File owner for TLS certificates."
+          group:
+            type: "str"
+            required: false
+            description: "File group for TLS certificates."
+          cert_mode:
+            type: "str"
+            required: false
+            description: "File mode for certificate file."
+          key_mode:
+            type: "str"
+            required: false
+            description: "File mode for private key file."
+          ca_mode:
+            type: "str"
+            required: false
+            description: "File mode for CA certificate file."

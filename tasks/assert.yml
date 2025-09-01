@@ -358,3 +358,81 @@
   when:
     - openbao_tls | length > 0
     - openbao_tls.ca_content is defined
+
+- name: assert | Test openbao_audit_devices
+  ansible.builtin.assert:
+    that:
+      - openbao_audit_devices is defined
+      - openbao_audit_devices is iterable
+    quiet: true
+
+- name: assert | Test each audit device (if any)
+  ansible.builtin.assert:
+    that:
+      - item.type is defined
+      - item.type is string
+      - item.type | length > 0
+      - item.type in [ 'file', 'syslog', 'socket' ]
+      - item.path is defined
+      - item.path is string
+      - item.path | length > 0
+    quiet: true
+  loop: "{{ openbao_audit_devices }}"
+  loop_control:
+    label: "{{ item.type }}:{{ item.path }}"
+  when:
+    - openbao_audit_devices | length > 0
+
+- name: assert | Test file audit device parameters
+  ansible.builtin.assert:
+    that:
+      - item.options is defined
+      - item.options is mapping
+      - item.options.file_path is defined
+      - item.options.file_path is string
+      - item.options.file_path | length > 0
+    quiet: true
+  loop: "{{ openbao_audit_devices }}"
+  loop_control:
+    label: "{{ item.type }}:{{ item.path }}"
+  when:
+    - openbao_audit_devices | length > 0
+    - item.type == 'file'
+    - item.options is defined
+
+- name: assert | Test syslog audit device parameters
+  ansible.builtin.assert:
+    that:
+      - item.options is defined
+      - item.options is mapping
+      - item.options.facility is defined
+      - item.options.facility is string
+      - item.options.facility | length > 0
+    quiet: true
+  loop: "{{ openbao_audit_devices }}"
+  loop_control:
+    label: "{{ item.type }}:{{ item.path }}"
+  when:
+    - openbao_audit_devices | length > 0
+    - item.type == 'syslog'
+    - item.options is defined
+
+- name: assert | Test socket audit device parameters
+  ansible.builtin.assert:
+    that:
+      - item.options is defined
+      - item.options is mapping
+      - item.options.address is defined
+      - item.options.address is string
+      - item.options.address | length > 0
+      - item.options.socket_type is defined
+      - item.options.socket_type is string
+      - item.options.socket_type in [ 'tcp', 'udp' ]
+    quiet: true
+  loop: "{{ openbao_audit_devices }}"
+  loop_control:
+    label: "{{ item.type }}:{{ item.path }}"
+  when:
+    - openbao_audit_devices | length > 0
+    - item.type == 'socket'
+    - item.options is defined
