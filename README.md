@@ -70,7 +70,7 @@ The default values for the variables are set in [`defaults/main.yml`](https://gi
 ## Version of OpenBao to install. The role will automatically determine
 ## the appropriate package URL based on your operating system and architecture.
 ## Example: "1.0.0"
-openbao_version: "2.3.2"
+openbao_version: "2.4.0"
 
 ## Directory to store the downloaded package before installation.
 openbao_download_dir: "/tmp"

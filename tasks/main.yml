@@ -51,6 +51,8 @@
     state: present
   when:
     - ansible_pkg_mgr in [ "apt" ]
+  notify:
+    - Restart OpenBao
 
 - name: Install OpenBao (rpm-based)
   ansible.builtin.dnf:
@@ -58,6 +60,8 @@
     state: present
   when:
     - ansible_pkg_mgr in [ "dnf", "dnf5", "yum" ]
+  notify:
+    - Restart OpenBao
 
 - name: Configure OpenBao
   ansible.builtin.template:
