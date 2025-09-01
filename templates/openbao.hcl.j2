@@ -192,7 +192,7 @@ audit "{{ audit.type }}" "{{ audit.path }}" {
     file_path = "{{ audit.options.file_path }}"
 {% endif %}
 {% if audit.options.log_raw is defined %}
-    log_raw = {{ audit.options.log_raw | ternary('true', 'false') }}
+    log_raw = "{{ audit.options.log_raw | ternary('true', 'false') }}"
 {% endif %}
 {% elif audit.type == 'syslog' %}
 {% if audit.options.facility is defined %}
