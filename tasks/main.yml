@@ -61,8 +61,8 @@
 
 - name: Configure OpenBao
   ansible.builtin.template:
-    src: bao.hcl.j2
-    dest: /etc/openbao/bao.hcl
+    src: openbao.hcl.j2
+    dest: /etc/openbao/openbao.hcl
     owner: root
     group: root
     mode: "0644"
