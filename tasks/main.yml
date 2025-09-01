@@ -68,3 +68,97 @@
     mode: "0644"
   notify:
     - Restart OpenBao
+
+- name: Ensure TLS directory exists
+  ansible.builtin.file:
+    path: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}"
+    state: directory
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "0755"
+  when:
+    - openbao_tls | length > 0
+
+- name: Backup existing TLS certificate
+  ansible.builtin.copy:
+    src: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.cert_file | default('tls.crt') }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.cert_file | default('tls.crt') }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: true
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.cert_mode | default('0644') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.cert_content is defined
+    - openbao_tls.cert_content | length > 0
+  ignore_errors: true
+
+- name: Backup existing TLS private key
+  ansible.builtin.copy:
+    src: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.key_file | default('tls.key') }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.key_file | default('tls.key') }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: true
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.key_mode | default('0600') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.key_content is defined
+    - openbao_tls.key_content | length > 0
+  ignore_errors: true
+
+- name: Backup existing TLS CA certificate
+  ansible.builtin.copy:
+    src: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.ca_file | default('ca.crt') }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.ca_file | default('ca.crt') }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: true
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.ca_mode | default('0644') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.ca_content is defined
+    - openbao_tls.ca_content | length > 0
+  ignore_errors: true
+
+- name: Deploy TLS certificate
+  ansible.builtin.copy:
+    content: "{{ openbao_tls.cert_content }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.cert_file | default('tls.crt') }}"
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.cert_mode | default('0644') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.cert_content is defined
+    - openbao_tls.cert_content | length > 0
+  notify:
+    - Restart OpenBao
+
+- name: Deploy TLS private key
+  ansible.builtin.copy:
+    content: "{{ openbao_tls.key_content }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.key_file | default('tls.key') }}"
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.key_mode | default('0600') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.key_content is defined
+    - openbao_tls.key_content | length > 0
+  notify:
+    - Restart OpenBao
+
+- name: Deploy TLS CA certificate
+  ansible.builtin.copy:
+    content: "{{ openbao_tls.ca_content }}"
+    dest: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}/{{ openbao_tls.ca_file | default('ca.crt') }}"
+    owner: "{{ openbao_tls.owner | default('openbao') }}"
+    group: "{{ openbao_tls.group | default('openbao') }}"
+    mode: "{{ openbao_tls.ca_mode | default('0644') }}"
+  when:
+    - openbao_tls | length > 0
+    - openbao_tls.ca_content is defined
+    - openbao_tls.ca_content | length > 0
+  notify:
+    - Restart OpenBao

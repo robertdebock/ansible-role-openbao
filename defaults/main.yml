@@ -85,8 +85,8 @@ openbao_storage:
 openbao_listeners:
   - name: tcp
     address: "0.0.0.0:8200"
-    tls_cert_file: "/opt/openbao/tls/tls.crt"
-    tls_key_file: "/opt/openbao/tls/tls.key"
+    tls_cert_file: "/opt/openbao/tls/tls.crt"  # This certificate is part of the openbao package.
+    tls_key_file: "/opt/openbao/tls/tls.key"  # This key is part of the openbao package.
 
 ## Cluster address for OpenBao. Required when using raft storage.
 ## This is the address that other nodes in the cluster will use to communicate.
@@ -208,3 +208,44 @@ openbao_telemetry: {}
 ##
 ## Valid levels: error, warn, info, debug, trace, off
 openbao_log_requests_level: "off"
+
+## TLS certificate management for OpenBao.
+## When this map is populated, the role will manage TLS certificates.
+## Leave empty to skip certificate management.
+##
+## Example for inline certificate content:
+## openbao_tls:
+##   directory: "/opt/openbao/tls"
+##   cert_file: "tls.crt"
+##   key_file: "tls.key"
+##   ca_file: "ca.crt"
+##   cert_content: |
+##     -----BEGIN CERTIFICATE-----
+##     MIIDXTCCAkWgAwIBAgIJAKoK...
+##     -----END CERTIFICATE-----
+##   key_content: |
+##     -----BEGIN PRIVATE KEY-----
+##     MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB...
+##     -----END PRIVATE KEY-----
+##   ca_content: |
+##     -----BEGIN CERTIFICATE-----
+##     MIIDXTCCAkWgAwIBAgIJAKoK...
+##     -----END CERTIFICATE-----
+##
+## Example for external file sources:
+## openbao_tls:
+##   directory: "/opt/openbao/tls"
+##   cert_content: "{{ lookup('file', '/path/to/cert.pem') }}"
+##   key_content: "{{ lookup('file', '/path/to/key.pem') }}"
+##   ca_content: "{{ lookup('file', '/path/to/ca.pem') }}"
+##
+## Example for custom filenames and directory:
+## openbao_tls:
+##   directory: "/etc/openbao/tls"
+##   cert_file: "server.crt"
+##   key_file: "server.key"
+##   ca_file: "ca.crt"
+##   cert_content: "{{ lookup('file', '/path/to/cert.pem') }}"
+##   key_content: "{{ lookup('file', '/path/to/key.pem') }}"
+##   ca_content: "{{ lookup('file', '/path/to/ca.pem') }}"
+openbao_tls: {}
