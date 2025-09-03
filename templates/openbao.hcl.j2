@@ -110,6 +110,9 @@ listener "{{ listener.name }}" {
   tls_key_file = "{{ listener.tls_key_file }}"
 {% endif %}
 }
+{% if not loop.last %}
+
+{% endif %}
 {% endfor %}
 
 {% if openbao_seal | length > 0 %}
