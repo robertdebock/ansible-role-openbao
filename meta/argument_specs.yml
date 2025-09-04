@@ -1,5 +1,4 @@
 ---
-
 argument_specs:
   main:
     short_description: "Install and configure openbao on your system."
@@ -521,3 +520,66 @@ argument_specs:
             type: "str"
             required: false
             description: "File mode for CA certificate file."
+      openbao_self_init_enable:
+        type: "bool"
+        required: false
+        default: false
+        description: "Enable declarative self-initialization; set true only on bootstrap node."
+      openbao_initialize:
+        type: "list"
+        required: false
+        default: []
+        description: "Declarative self-initialization blocks. Executed once on first startup."
+        elements: "dict"
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Initialization block name."
+          requests:
+            type: "list"
+            required: false
+            elements: "dict"
+            description: "List of initialization requests."
+            options:
+              name:
+                type: "str"
+                required: true
+                description: "Request name."
+              operation:
+                type: "str"
+                required: true
+                description: "Operation to perform (e.g., update)."
+              path:
+                type: "str"
+                required: true
+                description: "API path."
+              data:
+                type: "dict"
+                required: false
+                description: "Optional request data payload. Values may be scalars or eval objects."
+      openbao_service_environment:
+        type: "dict"
+        required: false
+        default: {}
+        description: "Environment variables injected into OpenBao systemd service."
+      openbao_orchestrate_cluster:
+        type: "bool"
+        required: false
+        default: false
+        description: "Orchestrate leader-first startup when self-initialization is used."
+      openbao_leader_host:
+        type: "str"
+        required: false
+        default: ""
+        description: "Inventory hostname of the leader node (required if orchestrating)."
+      openbao_healthcheck_validate_certs:
+        type: "bool"
+        required: false
+        default: false
+        description: "Validate TLS during health checks. Disable for self-signed bootstrap."
+      openbao_leader_api_addr:
+        type: "str"
+        required: false
+        default: ""
+        description: "API address of the leader used by followers during orchestration (e.g., http://boa-01:8200)."
