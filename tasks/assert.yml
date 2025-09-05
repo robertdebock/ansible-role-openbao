@@ -120,7 +120,7 @@
       - item.name is defined
       - item.name is string
       - item.name | length > 0
-      - item.name in [ 'awskms', 'alicloudkms', 'azurekeyvault', 'gcpckms', 'kmip', 'ocikms', 'pkcs11', 'transit' ]
+      - item.name in [ 'awskms', 'alicloudkms', 'azurekeyvault', 'gcpckms', 'kmip', 'ocikms', 'pkcs11', 'transit', 'static' ]
     quiet: true
   loop: "{{ openbao_seal }}"
   loop_control:
@@ -284,6 +284,23 @@
   when:
     - openbao_seal | length > 0
     - item.name == 'transit'
+
+- name: assert | Test Static seal parameters
+  ansible.builtin.assert:
+    that:
+      - item.current_key_id is defined
+      - item.current_key_id is string
+      - item.current_key_id | length > 0
+      - item.current_key is defined
+      - item.current_key is string
+      - item.current_key | length > 0
+    quiet: true
+  loop: "{{ openbao_seal }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_seal | length > 0
+    - item.name == 'static'
 
 - name: assert | Test openbao_telemetry
   ansible.builtin.assert:

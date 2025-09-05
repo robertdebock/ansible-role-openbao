@@ -177,6 +177,18 @@ seal "{{ seal.name }}" {
   address = "{{ seal.address }}"
   token = "{{ seal.token }}"
   key_name = "{{ seal.key_name }}"
+{% elif seal.name == 'static' %}
+  current_key_id = "{{ seal.current_key_id }}"
+  current_key = "{{ seal.current_key }}"
+{% if seal.previous_key_id is defined %}
+  previous_key_id = "{{ seal.previous_key_id }}"
+{% endif %}
+{% if seal.previous_key is defined %}
+  previous_key = "{{ seal.previous_key }}"
+{% endif %}
+{% if seal.disabled is defined %}
+  disabled = {{ seal.disabled | ternary('true', 'false') }}
+{% endif %}
 {% endif %}
 }
 {% endfor %}

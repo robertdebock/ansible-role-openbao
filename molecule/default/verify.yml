@@ -11,3 +11,9 @@
     - name: Verify OpenBao binary works
       ansible.builtin.command: bao --version
       changed_when: false
+
+    - name: Initialize OpenBao
+      ansible.builtin.command: bao operator init
+      environment:
+        BAO_ADDR: http://127.0.0.1:8200
+      changed_when: true
