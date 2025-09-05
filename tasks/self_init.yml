@@ -35,7 +35,7 @@
     url: "{{ (openbao_listeners | selectattr('name', 'equalto', 'tcp') | first).tls_disable | default(false) | ternary('http', 'https') }}://{{ ansible_play_hosts[0] }}:8200/v1/sys/health"
     method: GET
     return_content: false
-    validate_certs: false
+    validate_certs: "{{ openbao_healthcheck_validate_certs }}"
     status_code: 200
   register: _leader_health
   retries: 30
@@ -49,7 +49,7 @@
     url: "{{ (openbao_listeners | selectattr('name', 'equalto', 'tcp') | first).tls_disable | default(false) | ternary('http', 'https') }}://{{ ansible_play_hosts[0] }}:8200/v1/sys/health"
     method: GET
     return_content: false
-    validate_certs: false
+    validate_certs: "{{ openbao_healthcheck_validate_certs }}"
     status_code: 200
   register: _leader_ready
   retries: 60
