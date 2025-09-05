@@ -135,3 +135,9 @@
     - openbao_tls.ca_content | length > 0
   notify:
     - Reload OpenBao
+
+- name: Manage OpenBao service
+  ansible.builtin.systemd:
+    name: openbao
+    state: started
+    enabled: true
