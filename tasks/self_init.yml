@@ -26,7 +26,6 @@
     name: openbao
     state: started
     enabled: true
-    daemon_reload: true
   when:
     - inventory_hostname == ansible_play_hosts[0]
 
@@ -40,6 +39,5 @@
     name: openbao
     state: started
     enabled: true
-    daemon_reload: true
   when:
     - inventory_hostname != ansible_play_hosts[0]
