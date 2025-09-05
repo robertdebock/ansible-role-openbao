@@ -300,10 +300,6 @@ openbao_audit_devices: []
 ##   ca_content: "{{ lookup('file', '/path/to/ca.pem') }}"
 openbao_tls: {}
 
-## Enable declarative self-initialization blocks in openbao.hcl.
-## Must be true only on the bootstrap node. Requires auto-unseal (a seal configured).
-openbao_self_init_enable: false
-
 ## Declarative self-initialization blocks (executed once on first startup).
 ## Keep empty on non-bootstrap nodes.
 ## Example matching the RFC (requires env var INITIAL_ADMIN_PASSWORD):
@@ -336,21 +332,6 @@ openbao_initialize: []
 ##   INITIAL_ADMIN_PASSWORD: "changeme"
 openbao_service_environment: {}
 
-## Cluster orchestration (only relevant when using self-initialization)
-## When true, the role will:
-## - Start the leader node (openbao_leader_host) first and wait until healthy
-## - Then, on follower nodes, wait for leader health before starting the service
-## Leave false for default behavior managed by handlers.
-openbao_orchestrate_cluster: false
-
-## Inventory name of the leader node. Required when openbao_orchestrate_cluster is true.
-## Example: "boa-01"
-openbao_leader_host: ""
-
 ## Whether to validate TLS when calling the health endpoint.
 ## Disable if using self-signed certs during bootstrap.
 openbao_healthcheck_validate_certs: false
-
-## API address (scheme://host:port) of the leader, used by followers to wait
-## for leader readiness during orchestration. Example: "http://boa-01:8200"
-openbao_leader_api_addr: ""
