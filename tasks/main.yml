@@ -63,121 +63,6 @@
   notify:
     - Restart OpenBao
 
-- name: Configure OpenBao
-  ansible.builtin.template:
-    src: openbao.hcl.j2
-    dest: /etc/openbao/openbao.hcl
-    owner: root
-    group: root
-    mode: "0644"
-  notify:
-    - Restart OpenBao
-
-- name: Ensure systemd drop-in directory exists (early)
-  ansible.builtin.file:
-    path: /etc/systemd/system/openbao.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  when:
-    - openbao_service_environment | length > 0
-
-- name: Configure OpenBao service environment drop-in (early)
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/openbao.service.d/10-env.conf
-    owner: root
-    group: root
-    mode: "0644"
-    content: |
-      [Service]
-      {% for key, value in openbao_service_environment.items() %}
-      Environment={{ key }}={{ value | quote }}
-      {% endfor %}
-  when:
-    - openbao_service_environment | length > 0
-  notify:
-    - Restart OpenBao
-
-- name: Ensure storage path exists for file/raft backends
-  ansible.builtin.file:
-    path: "{{ openbao_storage.path }}"
-    state: directory
-    owner: openbao
-    group: openbao
-    mode: "0750"
-  when:
-    - openbao_storage.type in [ 'file', 'raft' ]
-
-# Optional orchestration for self-initialization clusters
-- name: Apply pending handler changes immediately (leader)
-  ansible.builtin.meta: flush_handlers
-  when:
-    - openbao_orchestrate_cluster
-    - openbao_self_init_enable
-    - inventory_hostname == openbao_leader_host
-
-- name: Ensure OpenBao is enabled and started (leader)
-  ansible.builtin.systemd:
-    name: openbao
-    state: started
-    enabled: true
-    daemon_reload: true
-  when:
-    - openbao_orchestrate_cluster
-    - openbao_self_init_enable
-    - inventory_hostname == openbao_leader_host
-
-- name: Orchestrate leader-first startup | wait for leader health (leader node)
-  ansible.builtin.uri:
-    url: "{{ (openbao_api_addr | length > 0) | ternary(openbao_api_addr, 'http://127.0.0.1:8200') }}/v1/sys/health"
-    method: GET
-    return_content: false
-    validate_certs: "{{ openbao_healthcheck_validate_certs }}"
-    status_code: 200
-  register: _leader_health
-  retries: 30
-  delay: 5
-  until: _leader_health.status == 200
-  when:
-    - openbao_orchestrate_cluster
-    - openbao_self_init_enable
-    - inventory_hostname == openbao_leader_host
-
-- name: Orchestrate leader-first startup | wait for leader before followers
-  ansible.builtin.uri:
-    url: "{{ (openbao_leader_api_addr | length > 0) | ternary(openbao_leader_api_addr, 'http://' ~ openbao_leader_host ~ ':8200') }}/v1/sys/health"
-    method: GET
-    return_content: false
-    validate_certs: "{{ openbao_healthcheck_validate_certs }}"
-    status_code: 200
-  register: _leader_ready
-  retries: 60
-  delay: 5
-  until: _leader_ready.status == 200
-  when:
-    - openbao_orchestrate_cluster
-    - not openbao_self_init_enable
-    - openbao_leader_host | length > 0
-
-- name: Apply pending handler changes immediately (followers)
-  ansible.builtin.meta: flush_handlers
-  when:
-    - openbao_orchestrate_cluster
-    - not openbao_self_init_enable
-
-- name: Ensure OpenBao is enabled and started (followers)
-  ansible.builtin.systemd:
-    name: openbao
-    state: started
-    enabled: true
-    daemon_reload: true
-  when:
-    - openbao_orchestrate_cluster
-    - not openbao_self_init_enable
-
-# (moved earlier) systemd drop-in tasks
-
 - name: Ensure TLS directory exists
   ansible.builtin.file:
     path: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}"
@@ -232,3 +117,31 @@
     - openbao_tls.ca_content | length > 0
   notify:
     - Reload OpenBao
+
+- name: Ensure storage path exists for file/raft backends
+  ansible.builtin.file:
+    path: "{{ openbao_storage.path }}"
+    state: directory
+    owner: openbao
+    group: openbao
+    mode: "0750"
+  when:
+    - openbao_storage.type in [ 'file', 'raft' ]
+
+- name: Configure OpenBao (without orchestration)
+  ansible.builtin.template:
+    src: openbao.hcl.j2
+    dest: /etc/openbao/openbao.hcl
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart OpenBao
+  when:
+    - openbao_initialize | length == 0
+
+- name: Self Initialization | Include self_init.yml
+  ansible.builtin.include_tasks:
+    file: self_init.yml
+  when:
+    - openbao_initialize | length > 0

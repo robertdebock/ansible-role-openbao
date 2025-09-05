@@ -1,0 +1,73 @@
+- name: Configure OpenBao (with orchestration)
+  ansible.builtin.template:
+    src: openbao.hcl.j2
+    dest: /etc/openbao/openbao.hcl
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure OpenBao environment variables for self-initialization
+  ansible.builtin.template:
+    src: openbao.env.j2
+    dest: /etc/openbao/openbao.env
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - openbao_service_environment | length > 0
+
+- name: Apply pending handler changes immediately (leader)
+  ansible.builtin.meta: flush_handlers
+  when:
+    - inventory_hostname == ansible_play_hosts[0]
+
+- name: Ensure OpenBao is enabled and started (leader)
+  ansible.builtin.systemd:
+    name: openbao
+    state: started
+    enabled: true
+    daemon_reload: true
+  when:
+    - inventory_hostname == ansible_play_hosts[0]
+
+- name: Orchestrate leader-first startup | wait for leader health from leader node
+  ansible.builtin.uri:
+    url: "{{ (openbao_listeners | selectattr('name', 'equalto', 'tcp') | first).tls_disable | default(false) | ternary('http', 'https') }}://{{ ansible_play_hosts[0] }}:8200/v1/sys/health"
+    method: GET
+    return_content: false
+    validate_certs: false
+    status_code: 200
+  register: _leader_health
+  retries: 30
+  delay: 5
+  until: _leader_health.status == 200
+  when:
+    - inventory_hostname == ansible_play_hosts[0]
+
+- name: Orchestrate leader-first startup | verify leader health from standby node
+  ansible.builtin.uri:
+    url: "{{ (openbao_listeners | selectattr('name', 'equalto', 'tcp') | first).tls_disable | default(false) | ternary('http', 'https') }}://{{ ansible_play_hosts[0] }}:8200/v1/sys/health"
+    method: GET
+    return_content: false
+    validate_certs: false
+    status_code: 200
+  register: _leader_ready
+  retries: 60
+  delay: 5
+  until: _leader_ready.status == 200
+  when:
+    - inventory_hostname != ansible_play_hosts[0]
+
+- name: Apply pending handler changes immediately (followers)
+  ansible.builtin.meta: flush_handlers
+  when:
+    - inventory_hostname != ansible_play_hosts[0]
+
+- name: Ensure OpenBao is enabled and started (followers)
+  ansible.builtin.systemd:
+    name: openbao
+    state: started
+    enabled: true
+    daemon_reload: true
+  when:
+    - inventory_hostname != ansible_play_hosts[0]
