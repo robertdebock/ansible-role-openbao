@@ -140,9 +140,9 @@
   ansible.builtin.template:
     src: openbao.hcl.j2
     dest: /etc/openbao/openbao.hcl
-    owner: root
-    group: root
-    mode: "0644"
+    owner: openbao
+    group: openbao
+    mode: "0600"
   notify:
     - Restart OpenBao
   when:
