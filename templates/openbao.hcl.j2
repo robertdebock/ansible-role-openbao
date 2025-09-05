@@ -286,7 +286,7 @@ telemetry {
 }
 {% endif %}
 
-{% if openbao_self_init_enable and openbao_initialize | length > 0 %}
+{% if inventory_hostname == ansible_play_hosts[0] and openbao_initialize | length > 0 %}
 {% for block in openbao_initialize %}
 initialize "{{ block.name }}" {
 {% if block.requests is defined %}
