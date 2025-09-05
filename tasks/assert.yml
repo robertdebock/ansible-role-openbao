@@ -513,24 +513,6 @@
     - item.type == 'socket'
     - item.options is defined
 
-# Orchestration-related assertions (optional behavior)
-- name: assert | Test openbao_orchestrate_cluster
-  ansible.builtin.assert:
-    that:
-      - openbao_orchestrate_cluster is defined
-      - openbao_orchestrate_cluster is boolean
-    quiet: true
-
-- name: assert | Test openbao_leader_host when orchestrating
-  ansible.builtin.assert:
-    that:
-      - openbao_leader_host is defined
-      - openbao_leader_host is string
-      - openbao_leader_host | length > 0
-    quiet: true
-  when:
-    - openbao_orchestrate_cluster
-
 - name: assert | Test openbao_healthcheck_validate_certs
   ansible.builtin.assert:
     that:
