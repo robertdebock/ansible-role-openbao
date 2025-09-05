@@ -25,6 +25,8 @@
     validate_certs: "{{ openbao_validate_gpg_ssl }}"
 
 - name: Import OpenBao GPG key (apt)
+  when:
+    - ansible_pkg_mgr in [ "apt" ]
   block:
     - name: Import OpenBao GPG key (apt) - modern method
       ansible.builtin.shell: |
@@ -36,8 +38,6 @@
       ansible.builtin.apt_key:
         file: "{{ openbao_gpg_key_path }}"
         state: present
-  when:
-    - ansible_pkg_mgr in [ "apt" ]
 
 - name: Import OpenBao GPG key (dnf/dnf5/yum)
   ansible.builtin.rpm_key:
