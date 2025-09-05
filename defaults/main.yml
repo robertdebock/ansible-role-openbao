@@ -331,7 +331,3 @@ openbao_initialize: []
 ## openbao_service_environment:
 ##   INITIAL_ADMIN_PASSWORD: "changeme"
 openbao_service_environment: {}
-
-## Whether to validate TLS when calling the health endpoint.
-## Disable if using self-signed certs during bootstrap.
-openbao_healthcheck_validate_certs: false

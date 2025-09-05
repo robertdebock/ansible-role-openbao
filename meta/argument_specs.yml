@@ -557,9 +557,4 @@ argument_specs:
         type: "dict"
         required: false
         default: {}
-        description: "Environment variables injected into OpenBao systemd service."
-      openbao_healthcheck_validate_certs:
-        type: "bool"
-        required: false
-        default: false
-        description: "Validate TLS during health checks. Disable for self-signed bootstrap."
+        description: "Environment variables injected into openbao.env"
