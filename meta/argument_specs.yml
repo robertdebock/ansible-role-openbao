@@ -520,11 +520,6 @@ argument_specs:
             type: "str"
             required: false
             description: "File mode for CA certificate file."
-      openbao_self_init_enable:
-        type: "bool"
-        required: false
-        default: false
-        description: "Enable declarative self-initialization; set true only on bootstrap node."
       openbao_initialize:
         type: "list"
         required: false
@@ -563,23 +558,8 @@ argument_specs:
         required: false
         default: {}
         description: "Environment variables injected into OpenBao systemd service."
-      openbao_orchestrate_cluster:
-        type: "bool"
-        required: false
-        default: false
-        description: "Orchestrate leader-first startup when self-initialization is used."
-      openbao_leader_host:
-        type: "str"
-        required: false
-        default: ""
-        description: "Inventory hostname of the leader node (required if orchestrating)."
       openbao_healthcheck_validate_certs:
         type: "bool"
         required: false
         default: false
         description: "Validate TLS during health checks. Disable for self-signed bootstrap."
-      openbao_leader_api_addr:
-        type: "str"
-        required: false
-        default: ""
-        description: "API address of the leader used by followers during orchestration (e.g., http://boa-01:8200)."
