@@ -25,9 +25,17 @@
     validate_certs: "{{ openbao_validate_gpg_ssl }}"
 
 - name: Import OpenBao GPG key (apt)
-  ansible.builtin.apt_key:
-    file: "{{ openbao_gpg_key_path }}"
-    state: present
+  block:
+    - name: Import OpenBao GPG key (apt) - modern method
+      ansible.builtin.shell: |
+        gpg --dearmor -o /usr/share/keyrings/openbao-archive-keyring.gpg {{ openbao_gpg_key_path }}
+      args:
+        creates: /usr/share/keyrings/openbao-archive-keyring.gpg
+  rescue:
+    - name: Import OpenBao GPG key (apt) - legacy method
+      ansible.builtin.apt_key:
+        file: "{{ openbao_gpg_key_path }}"
+        state: present
   when:
     - ansible_pkg_mgr in [ "apt" ]
 
