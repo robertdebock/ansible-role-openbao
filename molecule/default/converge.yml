@@ -27,5 +27,9 @@
           path: "audit"
           description: "Audit logs to file"
           options:
-            file_path: "/var/log/openbao-audit.log"
+            file_path: "/openbao/logs/audit.log"
             log_raw: false
+      openbao_seal:
+        - name: static
+          current_key_id: "20250606-1"
+          current_key: "file:///openbao/secrets/unseal-20250606-1.key"

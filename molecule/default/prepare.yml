@@ -6,3 +6,54 @@
 
   roles:
     - role: robertdebock.bootstrap
+
+  tasks:
+    # To unseal using a static key, we need to generate a key and set the ownership and permissions.
+    # This is not a part of the Ansible role and needs to be done before applying this role.
+
+    # This package is required to generate a static unseal key.
+    - name: Install OpenSSL to generate static unseal key
+      ansible.builtin.package:
+        name: openssl
+        state: present
+
+    # This group is created by the OpenBao package, but since we're using a static unseal key, we need to create it ourselves.
+    - name: Create OpenBao group
+      ansible.builtin.group:
+        name: openbao
+        system: true
+        state: present
+
+    # This user is created by the OpenBao package, but since we're using a static unseal key, we need to create it ourselves.
+    - name: Create OpenBao user
+      ansible.builtin.user:
+        name: openbao
+        group: openbao
+        system: true
+        shell: /bin/false
+        home: /opt/openbao
+        create_home: false
+        state: present
+
+    - name: Create OpenBao directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0750'
+        owner: openbao
+        group: openbao
+      loop:
+        - /openbao/secrets
+        - /openbao/logs
+
+    - name: Generate static unseal key
+      ansible.builtin.command: openssl rand -out /openbao/secrets/unseal-20250606-1.key 32
+      args:
+        creates: /openbao/secrets/unseal-20250606-1.key
+
+    - name: Set ownership and permissions for static unseal key
+      ansible.builtin.file:
+        path: /openbao/secrets/unseal-20250606-1.key
+        owner: openbao
+        group: openbao
+        mode: '0640'

@@ -1,4 +1,4 @@
-# [Ansible role openbao](#openbao)
+# [Ansible role openbao](#ansible-role-openbao)
 
 Install and configure openbao on your system.
 
@@ -40,8 +40,12 @@ This example is taken from [`molecule/default/converge.yml`](https://github.com/
           path: "audit"
           description: "Audit logs to file"
           options:
-            file_path: "/var/log/openbao-audit.log"
+            file_path: "/openbao/logs/audit.log"
             log_raw: false
+      openbao_seal:
+        - name: static
+          current_key_id: "20250606-1"
+          current_key: "file:///openbao/secrets/unseal-20250606-1.key"
 ```
 
 The machine needs to be prepared. In CI this is done using [`molecule/default/prepare.yml`](https://github.com/robertdebock/ansible-role-openbao/blob/master/molecule/default/prepare.yml):
@@ -55,6 +59,57 @@ The machine needs to be prepared. In CI this is done using [`molecule/default/pr
 
   roles:
     - role: robertdebock.bootstrap
+
+  tasks:
+    # To unseal using a static key, we need to generate a key and set the ownership and permissions.
+    # This is not a part of the Ansible role and needs to be done before applying this role.
+
+    # This package is required to generate a static unseal key.
+    - name: Install OpenSSL to generate static unseal key
+      ansible.builtin.package:
+        name: openssl
+        state: present
+
+    # This group is created by the OpenBao package, but since we're using a static unseal key, we need to create it ourselves.
+    - name: Create OpenBao group
+      ansible.builtin.group:
+        name: openbao
+        system: true
+        state: present
+
+    # This user is created by the OpenBao package, but since we're using a static unseal key, we need to create it ourselves.
+    - name: Create OpenBao user
+      ansible.builtin.user:
+        name: openbao
+        group: openbao
+        system: true
+        shell: /bin/false
+        home: /opt/openbao
+        create_home: false
+        state: present
+
+    - name: Create OpenBao directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0750'
+        owner: openbao
+        group: openbao
+      loop:
+        - /openbao/secrets
+        - /openbao/logs
+
+    - name: Generate static unseal key
+      ansible.builtin.command: openssl rand -out /openbao/secrets/unseal-20250606-1.key 32
+      args:
+        creates: /openbao/secrets/unseal-20250606-1.key
+
+    - name: Set ownership and permissions for static unseal key
+      ansible.builtin.file:
+        path: /openbao/secrets/unseal-20250606-1.key
+        owner: openbao
+        group: openbao
+        mode: '0640'
 ```
 
 Also see a [full explanation and example](https://robertdebock.nl/how-to-use-these-roles.html) on how to use these roles.
@@ -231,6 +286,14 @@ openbao_api_addr: ""
 ##     token: "s.xyz123"
 ##     key_name: "autounseal"
 ##
+## Example for Static Key:
+## openbao_seal:
+##   - name: static
+##     current_key_id: "20250606-1"
+##     current_key: "file:///openbao/secrets/unseal-20250606-1.key"
+##     previous_key_id: "20250306-1"
+##     previous_key: "file:///openbao/secrets/unseal-20250306-1.key"
+##
 ## Example for no seal (Shamir's Secret Sharing):
 ## openbao_seal: []
 openbao_seal: []
@@ -381,7 +444,7 @@ The following roles are used to prepare a system. You can prepare your system in
 
 ## [Context](#context)
 
-This role is a part of many compatible roles. Have a look at [the documentation of these roles](https://robertdebock.nl/) for further information.
+This role is part of many compatible roles. Have a look at [the documentation of these roles](https://robertdebock.nl/) for further information.
 
 Here is an overview of related roles:
 ![dependencies](https://raw.githubusercontent.com/robertdebock/ansible-role-openbao/png/requirements.png "Dependencies")
@@ -398,13 +461,13 @@ This role has been tested on these [container images](https://hub.docker.com/u/r
 |[Fedora](https://hub.docker.com/r/robertdebock/fedora)|all|
 |[Ubuntu](https://hub.docker.com/r/robertdebock/ubuntu)|jammy, noble|
 
-The minimum version of Ansible required is 2.12, tests have been done to:
+The minimum version of Ansible required is 2.12, tests have been done on:
 
 - The previous version.
 - The current version.
 - The development version.
 
-If you find issues, please register them in [GitHub](https://github.com/robertdebock/ansible-role-openbao/issues).
+If you find issues, please register them on [GitHub](https://github.com/robertdebock/ansible-role-openbao/issues).
 
 ## [License](#license)
 

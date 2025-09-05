@@ -165,6 +165,14 @@ openbao_api_addr: ""
 ##     token: "s.xyz123"
 ##     key_name: "autounseal"
 ##
+## Example for Static Key:
+## openbao_seal:
+##   - name: static
+##     current_key_id: "20250606-1"
+##     current_key: "file:///openbao/secrets/unseal-20250606-1.key"
+##     previous_key_id: "20250306-1"
+##     previous_key: "file:///openbao/secrets/unseal-20250306-1.key"
+##
 ## Example for no seal (Shamir's Secret Sharing):
 ## openbao_seal: []
 openbao_seal: []

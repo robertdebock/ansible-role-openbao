@@ -196,6 +196,7 @@ argument_specs:
               - ocikms
               - pkcs11
               - transit
+              - static
             description: "Seal type."
           region:
             type: "str"
@@ -307,6 +308,27 @@ argument_specs:
             type: "str"
             required: false
             description: "PKCS#11 key label."
+          # Static seal parameters
+          current_key_id:
+            type: "str"
+            required: false
+            description: "Permanent identifier of the current key for static seal."
+          current_key:
+            type: "str"
+            required: false
+            description: "Current key for static seal (32-byte key, can use env:// or file:// prefix)."
+          previous_key_id:
+            type: "str"
+            required: false
+            description: "Permanent identifier of the previous key for static seal (used for key rotation)."
+          previous_key:
+            type: "str"
+            required: false
+            description: "Previous key for static seal (32-byte key, can use env:// or file:// prefix, used for key rotation)."
+          disabled:
+            type: "str"
+            required: false
+            description: "Set to 'true' if OpenBao is migrating from an auto seal configuration, otherwise set to 'false'."
       openbao_telemetry:
         type: "dict"
         required: false
