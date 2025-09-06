@@ -1,4 +1,5 @@
 ---
+
 # defaults file for openbao
 
 ## Version of OpenBao to install. The role will automatically determine
@@ -85,8 +86,8 @@ openbao_storage:
 openbao_listeners:
   - name: tcp
     address: "0.0.0.0:8200"
-    tls_cert_file: "/opt/openbao/tls/tls.crt" # This certificate is part of the openbao package.
-    tls_key_file: "/opt/openbao/tls/tls.key" # This key is part of the openbao package.
+    tls_cert_file: "/opt/openbao/tls/tls.crt"  # This certificate is part of the openbao package.
+    tls_key_file: "/opt/openbao/tls/tls.key"  # This key is part of the openbao package.
 
 ## Cluster address for OpenBao. Required when using raft storage.
 ## This is the address that other nodes in the cluster will use to communicate.

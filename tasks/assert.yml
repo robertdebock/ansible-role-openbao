@@ -1,4 +1,5 @@
 ---
+
 - name: assert | Test openbao_version
   ansible.builtin.assert:
     that:
