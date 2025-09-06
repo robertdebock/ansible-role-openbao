@@ -1,5 +1,4 @@
 ---
-
 - name: assert | Test openbao_version
   ansible.builtin.assert:
     that:
@@ -399,6 +398,72 @@
     label: "{{ item.type }}:{{ item.path }}"
   when:
     - openbao_audit_devices | length > 0
+
+- name: assert | Test openbao_initialize type
+  ansible.builtin.assert:
+    that:
+      - openbao_initialize is defined
+      - openbao_initialize is iterable
+    quiet: true
+
+- name: assert | Gate self-init requires a seal (auto-unseal)
+  ansible.builtin.assert:
+    that:
+      - openbao_seal | length > 0
+    fail_msg: "Self-initialization requires auto-unseal to be configured (openbao_seal). See RFC self-init."
+    quiet: true
+  when:
+    - openbao_initialize | length > 0
+
+- name: assert | Validate initialize blocks
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name is string
+      - (item.requests is not defined) or (item.requests is iterable)
+    quiet: true
+  loop: "{{ openbao_initialize }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
+  when:
+    - openbao_initialize | length > 0
+
+- name: assert | Validate initialize requests
+  ansible.builtin.assert:
+    that:
+      - item.1.name is defined
+      - item.1.name is string
+      - item.1.operation is defined
+      - item.1.operation is string
+      - item.1.path is defined
+      - item.1.path is string
+      - (item.1.data is not defined) or (item.1.data is mapping)
+    quiet: true
+  with_subelements:
+    - "{{ openbao_initialize }}"
+    - requests
+  loop_control:
+    label: "{{ item.0.name | default('unnamed') }} -> {{ item.1.name | default('unnamed') }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.0.requests is defined
+
+- name: assert | Validate initialize data eval objects
+  ansible.builtin.assert:
+    that:
+      - item.value.eval_type is defined
+      - item.value.eval_source is defined
+    quiet: true
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
 
 - name: assert | Test file audit device parameters
   ansible.builtin.assert:

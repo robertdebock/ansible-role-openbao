@@ -71,16 +71,6 @@
   notify:
     - Restart OpenBao
 
-- name: Configure OpenBao
-  ansible.builtin.template:
-    src: openbao.hcl.j2
-    dest: /etc/openbao/openbao.hcl
-    owner: root
-    group: root
-    mode: "0644"
-  notify:
-    - Restart OpenBao
-
 - name: Ensure TLS directory exists
   ansible.builtin.file:
     path: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}"
@@ -135,6 +125,34 @@
     - openbao_tls.ca_content | length > 0
   notify:
     - Reload OpenBao
+
+- name: Ensure storage path exists for file/raft backends
+  ansible.builtin.file:
+    path: "{{ openbao_storage.path }}"
+    state: directory
+    owner: openbao
+    group: openbao
+    mode: "0750"
+  when:
+    - openbao_storage.type in [ 'file', 'raft' ]
+
+- name: Configure OpenBao (without orchestration)
+  ansible.builtin.template:
+    src: openbao.hcl.j2
+    dest: /etc/openbao/openbao.hcl
+    owner: openbao
+    group: openbao
+    mode: "0600"
+  notify:
+    - Restart OpenBao
+  when:
+    - openbao_initialize | length == 0
+
+- name: Self Initialization | Include self_init.yml
+  ansible.builtin.include_tasks:
+    file: self_init.yml
+  when:
+    - openbao_initialize | length > 0
 
 - name: Manage OpenBao service
   ansible.builtin.systemd:

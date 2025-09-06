@@ -297,3 +297,65 @@ telemetry {
 {% endif %}
 }
 {% endif %}
+
+{% if inventory_hostname == ansible_play_hosts[0] and openbao_initialize | length > 0 %}
+{% for block in openbao_initialize %}
+initialize "{{ block.name }}" {
+{% if block.requests is defined %}
+{% for req in block.requests %}
+  request "{{ req.name }}" {
+    operation = "{{ req.operation }}"
+    path = "{{ req.path }}"
+{% if req.data is defined and req.data | length > 0 %}
+    data = {
+{% for k, v in req.data.items() %}
+{% if v is mapping and 'eval_type' in v and 'eval_source' in v %}
+      {{ k }} = {
+        eval_type = "{{ v.eval_type }}"
+        eval_source = "{{ v.eval_source }}"
+{% if v.env_var is defined %}
+        env_var = "{{ v.env_var }}"
+{% endif %}
+{% if v.file is defined %}
+        file = "{{ v.file }}"
+{% endif %}
+{% if v.request is defined %}
+        request = "{{ v.request }}"
+{% endif %}
+{% if v.response is defined %}
+        response = "{{ v.response }}"
+{% endif %}
+{% if v.template is defined %}
+        template = "{{ v.template }}"
+{% endif %}
+      }
+{% else %}
+{% if v is string and ('\n' in v) %}
+      {{ k }} = <<EOP
+{{ v }}
+EOP
+{% elif v is string %}
+      {{ k }} = {{ v | tojson }}
+{% elif v is boolean %}
+      {{ k }} = {{ v | ternary('true', 'false') }}
+{% elif v is sequence %}
+      {{ k }} = {{ v | tojson }}
+{% else %}
+      {{ k }} = {{ v }}
+{% endif %}
+{% endif %}
+{% endfor %}
+    }
+{% endif %}
+  }
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
+{% endif %}
+}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
+{% endif %}

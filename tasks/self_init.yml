@@ -1,0 +1,43 @@
+- name: self-init | Configure OpenBao (with orchestration)
+  ansible.builtin.template:
+    src: openbao.hcl.j2
+    dest: /etc/openbao/openbao.hcl
+    owner: openbao
+    group: openbao
+    mode: "0600"
+
+- name: self-init | Configure OpenBao environment variables for self-initialization
+  ansible.builtin.template:
+    src: openbao.env.j2
+    dest: /etc/openbao/openbao.env
+    owner: openbao
+    group: openbao
+    mode: "0600"
+  when:
+    - openbao_service_environment | length
+
+- name: self-init | Apply pending handler changes immediately (leader)
+  ansible.builtin.meta: flush_handlers
+  when:
+    - inventory_hostname == ansible_play_hosts[0]
+
+- name: self-init | Ensure OpenBao is enabled and started (leader)
+  ansible.builtin.systemd:
+    name: openbao
+    state: started
+    enabled: true
+  when:
+    - inventory_hostname == ansible_play_hosts[0]
+
+- name: self-init | Apply pending handler changes immediately (followers)
+  ansible.builtin.meta: flush_handlers
+  when:
+    - inventory_hostname != ansible_play_hosts[0]
+
+- name: self-init | Ensure OpenBao is enabled and started (followers)
+  ansible.builtin.systemd:
+    name: openbao
+    state: started
+    enabled: true
+  when:
+    - inventory_hostname != ansible_play_hosts[0]
