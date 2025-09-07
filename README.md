@@ -120,6 +120,7 @@ The default values for the variables are set in [`defaults/main.yml`](https://gi
 
 ```yaml
 ---
+
 # defaults file for openbao
 
 ## Version of OpenBao to install. The role will automatically determine
@@ -428,6 +429,48 @@ openbao_audit_devices: []
 ##   key_content: "{{ lookup('file', '/path/to/key.pem') }}"
 ##   ca_content: "{{ lookup('file', '/path/to/ca.pem') }}"
 openbao_tls: {}
+
+## Declarative self-initialization blocks (executed once on first startup).
+## Keep empty on non-bootstrap nodes.
+## Example matching the RFC (requires env var INITIAL_ADMIN_PASSWORD):
+## openbao_initialize:
+##   - name: identity
+##     requests:
+##       - name: mount-userpass
+##         operation: update
+##         path: sys/auth/userpass
+##         data:
+##           type: userpass
+##           path: userpass/
+##           description: admin
+##       - name: userpass-add-admin
+##         operation: update
+##         path: auth/userpass/users/admin
+##         data:
+##           password:
+##             eval_type: string
+##             eval_source: env
+##             env_var: INITIAL_ADMIN_PASSWORD
+##           token_policies:
+##             - superuser
+##       - name: policy
+##         requests:
+##           - name: add-superuser-policy
+##             operation: update
+##             path: sys/policies/acl/superuser
+##             data:
+##               policy: |
+##                 path "*" {
+##                  capabilities = ["create", "update", "read", "delete", "list", "scan", "sudo"]
+##                }
+openbao_initialize: []
+
+## Environment variables to inject into the OpenBao systemd service.
+## Use this to pass secrets needed for self-initialization (e.g., INITIAL_ADMIN_PASSWORD).
+## Example:
+## openbao_service_environment:
+##   INITIAL_ADMIN_PASSWORD: "changeme"
+openbao_service_environment: {}
 ```
 
 ## [Requirements](#requirements)

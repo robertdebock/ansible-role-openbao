@@ -332,6 +332,16 @@ openbao_tls: {}
 ##             env_var: INITIAL_ADMIN_PASSWORD
 ##           token_policies:
 ##             - superuser
+##       - name: policy
+##         requests:
+##           - name: add-superuser-policy
+##             operation: update
+##             path: sys/policies/acl/superuser
+##             data:
+##               policy: |
+##                 path "*" {
+##                  capabilities = ["create", "update", "read", "delete", "list", "scan", "sudo"]
+##                }
 openbao_initialize: []
 
 ## Environment variables to inject into the OpenBao systemd service.
