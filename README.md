@@ -46,6 +46,17 @@ This example is taken from [`molecule/default/converge.yml`](https://github.com/
         - name: static
           current_key_id: "20250606-1"
           current_key: "file:///openbao/secrets/unseal-20250606-1.key"
+      # Install plugin binaries
+      openbao_plugin_directory: "/opt/openbao/plugins"
+      openbao_plugin_validate_certs: false
+      openbao_plugins:
+        - name: openbao-plugin-auth-aws
+          version: "0.1.0"
+          download_url: https://github.com/openbao/openbao-plugins/releases/download/auth-aws-v0.1.0/openbao-plugin-auth-aws_linux_amd64_v1.tar.gz
+        - name: openbao-plugin-secrets-aws
+          version: "0.1.0"
+          download_url: https://github.com/openbao/openbao-plugins/releases/download/secrets-aws-v0.1.0/openbao-plugin-secrets-aws_linux_amd64_v1.tar.gz
+      openbao_plugin_cleanup: false
 ```
 
 The machine needs to be prepared. In CI this is done using [`molecule/default/prepare.yml`](https://github.com/robertdebock/ansible-role-openbao/blob/master/molecule/default/prepare.yml):
@@ -471,6 +482,51 @@ openbao_initialize: []
 ## openbao_service_environment:
 ##   INITIAL_ADMIN_PASSWORD: "changeme"
 openbao_service_environment: {}
+
+## Plugin installation for OpenBao.
+## This role can download and install plugin binaries and set the
+## plugin_directory in the OpenBao configuration. Registration/enabling
+## of plugins in the catalog is intentionally out of scope.
+##
+## Directory where plugin binaries are installed and from which OpenBao
+## loads plugins. This will be rendered into openbao.hcl as
+## plugin_directory = "..." when non-empty.
+openbao_plugin_directory: "/opt/openbao/plugins"
+
+## Whether to validate TLS certificates when downloading plugins.
+openbao_plugin_validate_certs: true
+
+## List of plugins to install. Each item should contain:
+## - name: Binary name inside the archive (and final installed name)
+## - version: Version string used for naming the downloaded archive
+## - download_url: Direct URL to the plugin archive (.tar.gz)
+## Example:
+## openbao_plugins:
+##   - name: openbao-plugin-auth-aws
+##     version: "0.1.0"
+##     download_url: https://github.com/openbao/openbao-plugins/releases/download/auth-aws-v0.1.0/openbao-plugin-auth-aws_linux_amd64_v1.tar.gz
+openbao_plugins: []
+
+## Remove downloaded archives and temporary extracted files after install.
+openbao_plugin_cleanup: false
+
+## Plugin registration is intentionally not performed by this role.
+## To register plugins, see the OpenBao docs and perform registration
+## in your playbook after the server is initialized.
+##
+## Example (in your playbook):
+##   - name: Register plugin
+##     command:
+##       argv:
+##         - bao
+##         - plugin
+##         - register
+##         - "-sha256=<checksum>"
+##         - "<type>"   # auth|database|secret
+##         - "<name>"
+##     environment:
+##       BAO_ADDR: "http://127.0.0.1:8200"
+##       BAO_TOKEN: "<root or admin token>"
 ```
 
 ## [Requirements](#requirements)

@@ -35,6 +35,7 @@
           current_key: "file:///openbao/secrets/unseal-20250606-1.key"
       # Install plugin binaries
       openbao_plugin_directory: "/opt/openbao/plugins"
+      openbao_plugin_validate_certs: false
       openbao_plugins:
         - name: openbao-plugin-auth-aws
           version: "0.1.0"
