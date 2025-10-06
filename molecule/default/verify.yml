@@ -5,15 +5,63 @@
   gather_facts: true
 
   tasks:
-    - name: Check if connection still works
-      ansible.builtin.ping:
-
     - name: Verify OpenBao binary works
       ansible.builtin.command: bao --version
       changed_when: false
 
     - name: Initialize OpenBao
-      ansible.builtin.command: bao operator init
+      ansible.builtin.command: bao operator init -format json
       environment:
         BAO_ADDR: http://127.0.0.1:8200
       changed_when: true
+      register: openbao_initialize
+
+    - name: Capture root token from openbao initialize
+      ansible.builtin.set_fact:
+        openbao_root_token: "{{ (openbao_initialize.stdout | from_json).root_token }}"
+
+    - name: Register plugins
+      ansible.builtin.command:
+        argv:
+          - bao
+          - plugin
+          - register
+          - "-sha256={{ item.sha256 }}"
+          - "{{ item.type }}"
+          - "{{ item.name }}"
+      environment:
+        BAO_ADDR: http://127.0.0.1:8200
+        BAO_TOKEN: "{{ openbao_root_token }}"
+      changed_when: true
+      loop:
+        - name: openbao-plugin-auth-aws
+          type: auth
+          sha256: "5b2de2ab24ad44f11ab35f553cde341ad6f432183d6a73edc5cc48c2b8c9bbac"
+        - name: openbao-plugin-secrets-aws
+          type: secret
+          sha256: "bdecd7868ebce7d922cac93ef3f9edcb5fe6ecfe8097141189205c2e07d8f612"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: List plugins (JSON)
+      ansible.builtin.command: bao plugin list -format=json
+      environment:
+        BAO_ADDR: http://127.0.0.1:8200
+        BAO_TOKEN: "{{ openbao_root_token }}"
+      changed_when: false
+      register: openbao_plugin_list
+
+    - name: Assert plugins are registered (parsed JSON)
+      ansible.builtin.assert:
+        that:
+          - >-
+            ((openbao_plugin_list.stdout | from_json).details
+            | selectattr('type', 'equalto', 'auth')
+            | selectattr('name', 'equalto', 'openbao-plugin-auth-aws')
+            | list | length) > 0
+          - >-
+            ((openbao_plugin_list.stdout | from_json).details
+            | selectattr('type', 'equalto', 'secret')
+            | selectattr('name', 'equalto', 'openbao-plugin-secrets-aws')
+            | list | length) > 0
+        quiet: true

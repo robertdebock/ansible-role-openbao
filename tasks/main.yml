@@ -71,6 +71,102 @@
   notify:
     - Restart OpenBao
 
+- name: Ensure OpenBao plugin directory exists
+  ansible.builtin.file:
+    path: "{{ openbao_plugin_directory }}"
+    state: directory
+    owner: openbao
+    group: openbao
+    mode: "0755"
+  when:
+    - openbao_plugin_directory is defined
+    - openbao_plugin_directory | length > 0
+    - openbao_plugins | length > 0
+
+- name: Download OpenBao plugins
+  ansible.builtin.get_url:
+    url: "{{ item.download_url }}"
+    dest: "{{ openbao_download_dir.rstrip('/') }}/{{ item.name }}-{{ item.version }}.tar.gz"
+    mode: "0644"
+    validate_certs: "{{ openbao_plugin_validate_certs }}"
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_plugins | length > 0
+
+- name: Extract OpenBao plugins
+  ansible.builtin.unarchive:
+    src: "{{ openbao_download_dir.rstrip('/') }}/{{ item.name }}-{{ item.version }}.tar.gz"
+    dest: "{{ openbao_download_dir.rstrip('/') }}/"
+    remote_src: true
+    creates: "{{ openbao_download_dir.rstrip('/') }}/{{ (item.download_url | basename) | regex_replace('\\.tar\\.gz$', '') }}"
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_plugins | length > 0
+
+- name: Install OpenBao plugins
+  ansible.builtin.copy:
+    src: "{{ openbao_download_dir.rstrip('/') }}/{{ (item.download_url | basename) | regex_replace('\\.tar\\.gz$', '') }}"
+    dest: "{{ openbao_plugin_directory }}/{{ item.name }}"
+    owner: openbao
+    group: openbao
+    mode: "0755"
+    remote_src: true
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify:
+    - Restart OpenBao
+  when:
+    - openbao_plugins | length > 0
+
+- name: Compute SHA256 for installed plugins
+  ansible.builtin.stat:
+    path: "{{ openbao_plugin_directory }}/{{ item.name }}"
+    checksum_algorithm: sha256
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: openbao_plugin_stats
+  when:
+    - openbao_plugins | length > 0
+
+- name: Show registration guidance for installed plugins (with SHA256)
+  ansible.builtin.debug:
+    msg: >-
+      Register plugin '{{ item.item.name }}' once OpenBao is running and you have a token:
+      vault write sys/plugins/catalog/secret/{{ item.item.name }} sha256={{ item.stat.checksum }} command="{{ openbao_plugin_directory }}/{{ item.item.name }}"
+  loop: "{{ openbao_plugin_stats.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - openbao_plugins | length > 0
+
+- name: Clean up downloaded plugin archives
+  ansible.builtin.file:
+    path: "{{ openbao_download_dir.rstrip('/') }}/{{ item.name }}-{{ item.version }}.tar.gz"
+    state: absent
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_plugins | length > 0
+    - openbao_plugin_cleanup
+
+- name: Clean up extracted plugin binaries
+  ansible.builtin.file:
+    path: "{{ openbao_download_dir.rstrip('/') }}/{{ (item.download_url | basename) | regex_replace('\\.tar\\.gz$', '') }}"
+    state: absent
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_plugins | length > 0
+    - openbao_plugin_cleanup
+
 - name: Ensure TLS directory exists
   ansible.builtin.file:
     path: "{{ openbao_tls.directory | default('/opt/openbao/tls') }}"

@@ -33,3 +33,13 @@
         - name: static
           current_key_id: "20250606-1"
           current_key: "file:///openbao/secrets/unseal-20250606-1.key"
+      # Install plugin binaries
+      openbao_plugin_directory: "/opt/openbao/plugins"
+      openbao_plugins:
+        - name: openbao-plugin-auth-aws
+          version: "0.1.0"
+          download_url: https://github.com/openbao/openbao-plugins/releases/download/auth-aws-v0.1.0/openbao-plugin-auth-aws_linux_amd64_v1.tar.gz
+        - name: openbao-plugin-secrets-aws
+          version: "0.1.0"
+          download_url: https://github.com/openbao/openbao-plugins/releases/download/secrets-aws-v0.1.0/openbao-plugin-secrets-aws_linux_amd64_v1.tar.gz
+      openbao_plugin_cleanup: false

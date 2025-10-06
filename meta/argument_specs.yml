@@ -580,3 +580,37 @@ argument_specs:
         required: false
         default: {}
         description: "Environment variables injected into openbao.env"
+      openbao_plugin_directory:
+        type: "str"
+        required: false
+        default: "/opt/openbao/plugins"
+        description: "Directory where OpenBao loads plugin binaries."
+      openbao_plugin_validate_certs:
+        type: "bool"
+        required: false
+        default: true
+        description: "Whether to validate TLS certificates when downloading plugins."
+      openbao_plugins:
+        type: "list"
+        required: false
+        default: []
+        description: "List of plugins to install (binary installation only)."
+        elements: "dict"
+        options:
+          name:
+            type: "str"
+            required: true
+            description: "Plugin binary name (and final installed filename)."
+          version:
+            type: "str"
+            required: true
+            description: "Plugin version string (used in local archive filename)."
+          download_url:
+            type: "str"
+            required: true
+            description: "Direct URL to plugin archive (.tar.gz)."
+      openbao_plugin_cleanup:
+        type: "bool"
+        required: false
+        default: true
+        description: "Remove downloaded archives and temporary files after installation."

@@ -11,6 +11,10 @@ ui = {{ openbao_ui | ternary('true', 'false') }}
 log_requests_level = "{{ openbao_log_requests_level }}"
 {% endif %}
 
+{% if openbao_plugin_directory is defined and openbao_plugin_directory | length > 0 %}
+plugin_directory = "{{ openbao_plugin_directory }}"
+{% endif %}
+
 storage "{{ openbao_storage.type }}" {
 {% if openbao_storage.type in [ "file", "raft" ] %}
   path = "{{ openbao_storage.path }}"

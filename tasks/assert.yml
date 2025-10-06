@@ -325,6 +325,47 @@
       - openbao_validate_gpg_ssl is boolean
     quiet: true
 
+- name: assert | Test openbao_plugin_directory
+  ansible.builtin.assert:
+    that:
+      - openbao_plugin_directory is defined
+      - openbao_plugin_directory is string
+      - openbao_plugin_directory | length > 0
+    quiet: true
+
+- name: assert | Test openbao_plugin_validate_certs
+  ansible.builtin.assert:
+    that:
+      - openbao_plugin_validate_certs is defined
+      - openbao_plugin_validate_certs is boolean
+    quiet: true
+
+- name: assert | Test openbao_plugins type
+  ansible.builtin.assert:
+    that:
+      - openbao_plugins is defined
+      - openbao_plugins is iterable
+    quiet: true
+
+- name: assert | Test each plugin item (if any)
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name is string
+      - item.name | length > 0
+      - item.version is defined
+      - item.version is string
+      - item.version | length > 0
+      - item.download_url is defined
+      - item.download_url is string
+      - item.download_url | length > 0
+    quiet: true
+  loop: "{{ openbao_plugins }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
+  when:
+    - openbao_plugins | length > 0
+
 - name: assert | Test openbao_tls
   ansible.builtin.assert:
     that:
