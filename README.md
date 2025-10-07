@@ -554,7 +554,6 @@ This role has been tested on these [container images](https://hub.docker.com/u/r
 
 |container|tags|
 |---------|----|
-|[Amazon](https://hub.docker.com/r/robertdebock/amazonlinux)|Candidate|
 |[Debian](https://hub.docker.com/r/robertdebock/debian)|all|
 |[EL](https://hub.docker.com/r/robertdebock/enterpriselinux)|all|
 |[Fedora](https://hub.docker.com/r/robertdebock/fedora)|all|
