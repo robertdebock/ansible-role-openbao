@@ -28,6 +28,10 @@
   when:
     - ansible_pkg_mgr in [ "apt" ]
   block:
+    - name: Install gnupg
+      ansible.builtin.package:
+        name: gnupg2
+
     - name: Import OpenBao GPG key (apt) - modern method
       ansible.builtin.shell: |
         gpg --dearmor -o /usr/share/keyrings/openbao-archive-keyring.gpg {{ openbao_gpg_key_path }}
