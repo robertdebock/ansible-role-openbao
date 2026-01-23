@@ -113,6 +113,12 @@ listener "{{ listener.name }}" {
 {% if listener.tls_key_file is defined %}
   tls_key_file = "{{ listener.tls_key_file }}"
 {% endif %}
+{% if listener.proxy_protocol_behavior is defined %}
+  proxy_protocol_behavior = "{{ listener.proxy_protocol_behavior }}"
+{% endif %}
+{% if listener.proxy_protocol_authorized_addrs is defined %}
+  proxy_protocol_authorized_addrs = "{{ listener.proxy_protocol_authorized_addrs }}"
+{% endif %}
 }
 {% if not loop.last %}
 

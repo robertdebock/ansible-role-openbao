@@ -108,6 +108,16 @@
   loop_control:
     label: "{{ item.name }}"
 
+- name: assert | Test proxy_protocol parameters for listeners
+  ansible.builtin.assert:
+    that:
+      - (item.proxy_protocol_behavior is not defined) or (item.proxy_protocol_behavior in [ 'use_always', 'allow_authorized', 'deny_unauthorized' ])
+      - (item.proxy_protocol_authorized_addrs is not defined) or (item.proxy_protocol_authorized_addrs is string)
+    quiet: true
+  loop: "{{ openbao_listeners }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: assert | Test openbao_seal
   ansible.builtin.assert:
     that:

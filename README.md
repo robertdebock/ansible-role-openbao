@@ -215,6 +215,16 @@ penbao_storage:
 #     address: "0.0.0.0:8200"
 #     tls_cert_file: "/opt/openbao/tls/tls.crt"
 #     tls_key_file: "/opt/openbao/tls/tls.key"
+#
+# Example for listener proxy configuration:
+# openbao_listeners:
+#  - name: tcp
+#    address: "0.0.0.0:8202"
+#    tls_disable: false
+#    tls_cert_file: "/opt/openbao/tls/server.crt"
+#    tls_key_file: "/opt/openbao/tls/server.key"
+#    proxy_protocol_behavior: "use_always"
+#    proxy_protocol_authorized_addrs: "10.10.20.0/24"
 openbao_listeners:
   - name: tcp
     address: "0.0.0.0:8200"
