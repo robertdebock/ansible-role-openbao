@@ -55,7 +55,7 @@ openbao_ui: true
 # openbao_storage:
 #   type: postgresql
 #   connection_url: postgresql://user:pass@localhost:5432/openbao
-penbao_storage:
+openbao_storage:
   type: file
   path: /opt/openbao/data
 
