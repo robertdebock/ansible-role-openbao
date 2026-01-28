@@ -179,12 +179,6 @@
       - item.tenant_id is defined
       - item.tenant_id is string
       - item.tenant_id | length > 0
-      - item.client_id is defined
-      - item.client_id is string
-      - item.client_id | length > 0
-      - item.client_secret is defined
-      - item.client_secret is string
-      - item.client_secret | length > 0
       - item.vault_name is defined
       - item.vault_name is string
       - item.vault_name | length > 0
@@ -198,6 +192,34 @@
   when:
     - openbao_seal | length > 0
     - item.name == 'azurekeyvault'
+
+- name: assert | Test Azure Key Vault seal client_id (if provided)
+  ansible.builtin.assert:
+    that:
+      - item.client_id is string
+      - item.client_id | length > 0
+    quiet: true
+  loop: "{{ openbao_seal }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_seal | length > 0
+    - item.name == 'azurekeyvault'
+    - item.client_id is defined
+
+- name: assert | Test Azure Key Vault seal client_secret (if provided)
+  ansible.builtin.assert:
+    that:
+      - item.client_secret is string
+      - item.client_secret | length > 0
+    quiet: true
+  loop: "{{ openbao_seal }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - openbao_seal | length > 0
+    - item.name == 'azurekeyvault'
+    - item.client_secret is defined
 
 - name: assert | Test GCP Cloud KMS seal parameters
   ansible.builtin.assert:

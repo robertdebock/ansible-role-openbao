@@ -148,8 +148,12 @@ seal "{{ seal.name }}" {
   key_id = "{{ seal.key_id }}"
 {% elif seal.name == 'azurekeyvault' %}
   tenant_id = "{{ seal.tenant_id }}"
+{% if seal.client_id is defined %}
   client_id = "{{ seal.client_id }}"
+{% endif %}
+{% if seal.client_secret is defined %}
   client_secret = "{{ seal.client_secret }}"
+{% endif %}
   vault_name = "{{ seal.vault_name }}"
   key_name = "{{ seal.key_name }}"
 {% elif seal.name == 'gcpckms' %}

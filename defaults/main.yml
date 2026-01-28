@@ -118,12 +118,19 @@ openbao_api_addr: ""
 #     secret_key: "ZYX"
 #     key_id: "1-2-3"
 #
-# Example for Azure Key Vault:
+# Example for Azure Key Vault (with client credentials):
 # openbao_seal:
 #   - name: azurekeyvault
 #     tenant_id: "tenant-id"
 #     client_id: "client-id"
 #     client_secret: "client-secret"
+#     vault_name: "vault-name"
+#     key_name: "key-name"
+#
+# Example for Azure Key Vault (with machine identity / Managed Identity):
+# openbao_seal:
+#   - name: azurekeyvault
+#     tenant_id: "tenant-id"
 #     vault_name: "vault-name"
 #     key_name: "key-name"
 #
