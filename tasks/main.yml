@@ -13,7 +13,7 @@
     state: directory
     owner: root
     group: root
-    mode: "0755"
+    mode: "{{ openbao_download_dir_mode }}"
 
 # Download OpenBao GPG key with SSL verification disabled to handle
 # older Ubuntu versions (Focal, Jammy) with outdated CA certificates

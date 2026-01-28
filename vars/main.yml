@@ -27,3 +27,11 @@ openbao_gpg_key_url: "https://openbao.org/assets/openbao-gpg-pub-20240618.asc"
 
 # Local GPG key path
 openbao_gpg_key_path: "{{ openbao_download_dir.rstrip('/') + '/openbao_public_key.asc' }}"
+
+# Determine directory mode based on path
+# /tmp requires 1777 (sticky bit) to work properly with apt and other tools
+_openbao_download_dir_mode:
+  default: "0755"
+  "/tmp": "1777"
+
+openbao_download_dir_mode: "{{ _openbao_download_dir_mode[openbao_download_dir] | default(_openbao_download_dir_mode['default']) }}"
