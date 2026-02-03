@@ -539,6 +539,74 @@
     - openbao_initialize | length > 0
     - item.value is mapping
 
+- name: assert | Validate eval_source=env requires env_var
+  ansible.builtin.assert:
+    that:
+      - item.value.env_var is defined
+      - item.value.env_var is string
+      - item.value.env_var | length > 0
+    quiet: true
+    fail_msg: "eval_source=env requires env_var to be defined"
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
+    - item.value.eval_source is defined
+    - item.value.eval_source == 'env'
+
+- name: assert | Validate eval_source=file requires path
+  ansible.builtin.assert:
+    that:
+      - item.value.path is defined
+      - item.value.path is string
+      - item.value.path | length > 0
+    quiet: true
+    fail_msg: "eval_source=file requires path to be defined"
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
+    - item.value.eval_source is defined
+    - item.value.eval_source == 'file'
+
+- name: assert | Validate eval_source=request/response requires initialize_name, request_name, field_selector
+  ansible.builtin.assert:
+    that:
+      - item.value.initialize_name is defined
+      - item.value.initialize_name is string
+      - item.value.initialize_name | length > 0
+      - item.value.request_name is defined
+      - item.value.request_name is string
+      - item.value.request_name | length > 0
+      - item.value.field_selector is defined
+      - item.value.field_selector is string or item.value.field_selector is sequence
+    quiet: true
+    fail_msg: "eval_source=request/response requires initialize_name, request_name, and field_selector"
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
+    - item.value.eval_source is defined
+    - item.value.eval_source in ['request', 'response']
+
 - name: assert | Test file audit device parameters
   ansible.builtin.assert:
     that:

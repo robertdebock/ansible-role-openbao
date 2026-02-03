@@ -336,11 +336,33 @@ openbao_tls: {}
 #         path: auth/userpass/users/admin
 #         data:
 #           password:
+#             # Example: env source (requires env_var)
 #             eval_type: string
 #             eval_source: env
 #             env_var: INITIAL_ADMIN_PASSWORD
 #           token_policies:
 #             - superuser
+#       - name: enable-oidc
+#         operation: update
+#         path: sys/auth/oidc
+#         data:
+#           type: oidc
+#       - name: configure-oidc
+#         operation: update
+#         path: auth/oidc/config
+#         data:
+#           # Example: file source (requires path)
+#           oidc_client_id:
+#             eval_type: string
+#             eval_source: file
+#             path: /etc/openbao/oidc-client-id
+#           # Example: response source (requires initialize_name, request_name, field_selector)
+#           mount_accessor:
+#             eval_type: string
+#             eval_source: response
+#             initialize_name: identity
+#             request_name: enable-oidc
+#             field_selector: mount_accessor
 #       - name: policy
 #         requests:
 #           - name: add-superuser-policy

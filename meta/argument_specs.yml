@@ -574,7 +574,14 @@ argument_specs:
               data:
                 type: "dict"
                 required: false
-                description: "Optional request data payload. Values may be scalars or eval objects."
+                description: |
+                  Optional request data payload. Values may be scalars or eval objects.
+                  Eval objects support dynamic value resolution with required fields eval_type and eval_source.
+                  Additional fields depend on eval_source:
+                  - env: env_var (required), require_present (optional)
+                  - file: path (required)
+                  - request: initialize_name (required), request_name (required), field_selector (required, string or list)
+                  - response: initialize_name (required), request_name (required), field_selector (required, string or list)
       openbao_service_environment:
         type: "dict"
         required: false
