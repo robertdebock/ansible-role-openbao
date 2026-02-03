@@ -560,6 +560,26 @@
     - item.value.eval_source is defined
     - item.value.eval_source == 'env'
 
+- name: assert | Validate eval_source=env require_present is boolean if defined
+  ansible.builtin.assert:
+    that:
+      - item.value.require_present is boolean
+    quiet: true
+    fail_msg: "eval_source=env require_present must be a boolean if defined"
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
+    - item.value.eval_source is defined
+    - item.value.eval_source == 'env'
+    - item.value.require_present is defined
+
 - name: assert | Validate eval_source=file requires path
   ansible.builtin.assert:
     that:
@@ -592,8 +612,9 @@
       - item.value.request_name | length > 0
       - item.value.field_selector is defined
       - item.value.field_selector is string or item.value.field_selector is sequence
+      - (item.value.field_selector is string and item.value.field_selector | length > 0) or (item.value.field_selector is sequence and item.value.field_selector | length > 0)
     quiet: true
-    fail_msg: "eval_source=request requires initialize_name, request_name, and field_selector"
+    fail_msg: "eval_source=request requires initialize_name, request_name, and non-empty field_selector"
   loop: "{{ openbao_initialize
     | map(attribute='requests') | sum(start=[])
     | selectattr('data', 'defined')
@@ -618,8 +639,9 @@
       - item.value.response_name | length > 0
       - item.value.field_selector is defined
       - item.value.field_selector is string or item.value.field_selector is sequence
+      - (item.value.field_selector is string and item.value.field_selector | length > 0) or (item.value.field_selector is sequence and item.value.field_selector | length > 0)
     quiet: true
-    fail_msg: "eval_source=response requires initialize_name, response_name, and field_selector"
+    fail_msg: "eval_source=response requires initialize_name, response_name, and non-empty field_selector"
   loop: "{{ openbao_initialize
     | map(attribute='requests') | sum(start=[])
     | selectattr('data', 'defined')
