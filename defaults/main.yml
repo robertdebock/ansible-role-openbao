@@ -356,12 +356,12 @@ openbao_tls: {}
 #             eval_type: string
 #             eval_source: file
 #             path: /etc/openbao/oidc-client-id
-#           # Example: response source (requires initialize_name, request_name, field_selector)
+#           # Example: response source (requires initialize_name, response_name, field_selector)
 #           mount_accessor:
 #             eval_type: string
 #             eval_source: response
 #             initialize_name: identity
-#             request_name: enable-oidc
+#             response_name: enable-oidc
 #             field_selector: mount_accessor
 #       - name: policy
 #         requests:

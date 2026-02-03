@@ -581,7 +581,7 @@
     - item.value.eval_source is defined
     - item.value.eval_source == 'file'
 
-- name: assert | Validate eval_source=request/response requires initialize_name, request_name, field_selector
+- name: assert | Validate eval_source=request requires initialize_name, request_name, field_selector
   ansible.builtin.assert:
     that:
       - item.value.initialize_name is defined
@@ -593,7 +593,7 @@
       - item.value.field_selector is defined
       - item.value.field_selector is string or item.value.field_selector is sequence
     quiet: true
-    fail_msg: "eval_source=request/response requires initialize_name, request_name, and field_selector"
+    fail_msg: "eval_source=request requires initialize_name, request_name, and field_selector"
   loop: "{{ openbao_initialize
     | map(attribute='requests') | sum(start=[])
     | selectattr('data', 'defined')
@@ -605,7 +605,33 @@
     - openbao_initialize | length > 0
     - item.value is mapping
     - item.value.eval_source is defined
-    - item.value.eval_source in ['request', 'response']
+    - item.value.eval_source == 'request'
+
+- name: assert | Validate eval_source=response requires initialize_name, response_name, field_selector
+  ansible.builtin.assert:
+    that:
+      - item.value.initialize_name is defined
+      - item.value.initialize_name is string
+      - item.value.initialize_name | length > 0
+      - item.value.response_name is defined
+      - item.value.response_name is string
+      - item.value.response_name | length > 0
+      - item.value.field_selector is defined
+      - item.value.field_selector is string or item.value.field_selector is sequence
+    quiet: true
+    fail_msg: "eval_source=response requires initialize_name, response_name, and field_selector"
+  loop: "{{ openbao_initialize
+    | map(attribute='requests') | sum(start=[])
+    | selectattr('data', 'defined')
+    | map(attribute='data')
+    | map('dict2items') | sum(start=[]) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - openbao_initialize | length > 0
+    - item.value is mapping
+    - item.value.eval_source is defined
+    - item.value.eval_source == 'response'
 
 - name: assert | Test file audit device parameters
   ansible.builtin.assert:
