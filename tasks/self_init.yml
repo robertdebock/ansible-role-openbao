@@ -43,3 +43,23 @@
     enabled: true
   when:
     - inventory_hostname != ansible_play_hosts[0]
+
+- name: self_init | Wait for OpenBao service to be running
+  ansible.builtin.command:
+    cmd: systemctl is-active openbao
+  register: openbao_service_status
+  until: openbao_service_status.stdout == "active"
+  retries: 10
+  delay: 2
+  changed_when: false
+  when:
+    - openbao_service_environment | length > 0
+    - not openbao_service_environment_persist
+
+- name: self_init | Remove environment file after initialization (non-persistent)
+  ansible.builtin.file:
+    path: /etc/openbao/openbao.env
+    state: absent
+  when:
+    - openbao_service_environment | length > 0
+    - not openbao_service_environment_persist

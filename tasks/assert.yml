@@ -708,3 +708,17 @@
     - openbao_audit_devices | length > 0
     - item.type == 'socket'
     - item.options is defined
+
+- name: assert | Test openbao_service_environment
+  ansible.builtin.assert:
+    that:
+      - openbao_service_environment is defined
+      - openbao_service_environment is mapping
+    quiet: true
+
+- name: assert | Test openbao_service_environment_persist
+  ansible.builtin.assert:
+    that:
+      - openbao_service_environment_persist is defined
+      - openbao_service_environment_persist is boolean
+    quiet: true
