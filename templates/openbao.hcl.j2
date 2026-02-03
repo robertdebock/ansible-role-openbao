@@ -327,20 +327,45 @@ initialize "{{ block.name }}" {
       {{ k }} = {
         eval_type = "{{ v.eval_type }}"
         eval_source = "{{ v.eval_source }}"
+{% if v.eval_source == 'env' %}
 {% if v.env_var is defined %}
         env_var = "{{ v.env_var }}"
 {% endif %}
-{% if v.file is defined %}
-        file = "{{ v.file }}"
+{% if v.require_present is defined %}
+        require_present = {{ v.require_present | ternary('true', 'false') }}
 {% endif %}
-{% if v.request is defined %}
-        request = "{{ v.request }}"
+{% elif v.eval_source == 'file' %}
+{% if v.path is defined %}
+        path = "{{ v.path }}"
 {% endif %}
-{% if v.response is defined %}
-        response = "{{ v.response }}"
+{% elif v.eval_source == 'request' %}
+{% if v.initialize_name is defined %}
+        initialize_name = "{{ v.initialize_name }}"
 {% endif %}
-{% if v.template is defined %}
-        template = "{{ v.template }}"
+{% if v.request_name is defined %}
+        request_name = "{{ v.request_name }}"
+{% endif %}
+{% if v.field_selector is defined %}
+{% if v.field_selector is string %}
+        field_selector = "{{ v.field_selector }}"
+{% elif v.field_selector is sequence %}
+        field_selector = {{ v.field_selector | tojson }}
+{% endif %}
+{% endif %}
+{% elif v.eval_source == 'response' %}
+{% if v.initialize_name is defined %}
+        initialize_name = "{{ v.initialize_name }}"
+{% endif %}
+{% if v.response_name is defined %}
+        response_name = "{{ v.response_name }}"
+{% endif %}
+{% if v.field_selector is defined %}
+{% if v.field_selector is string %}
+        field_selector = "{{ v.field_selector }}"
+{% elif v.field_selector is sequence %}
+        field_selector = {{ v.field_selector | tojson }}
+{% endif %}
+{% endif %}
 {% endif %}
       }
 {% else %}
