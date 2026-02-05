@@ -2,17 +2,14 @@
 
 # defaults file for openbao
 
-# Version of OpenBao to install. The role will automatically determine
-# the appropriate package URL based on your operating system and architecture.
-# Example: "1.0.0"
-openbao_version: "2.4.4"
+# Version of OpenBao to install. This value is used to select the
+# package version from your configured package repositories.
+# Example: "2.5.0"
+openbao_version: "2.5.0"
 
-# Directory to store the downloaded package before installation.
+# Directory to store temporary downloaded artifacts (for example,
+# plugin archives). This directory is created before any downloads.
 openbao_download_dir: "/tmp"
-
-# Whether to validate SSL certificates when downloading the GPG key.
-# Set to false to handle older Ubuntu versions with outdated CA certificates.
-openbao_validate_gpg_ssl: false
 
 # Enable or disable the OpenBao web UI. When true, the UI will be
 # accessible at the configured listener address.

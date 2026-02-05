@@ -350,13 +350,6 @@
       - openbao_log_requests_level in [ 'error', 'warn', 'info', 'debug', 'trace', 'off' ]
     quiet: true
 
-- name: assert | Test openbao_validate_gpg_ssl
-  ansible.builtin.assert:
-    that:
-      - openbao_validate_gpg_ssl is defined
-      - openbao_validate_gpg_ssl is boolean
-    quiet: true
-
 - name: assert | Test openbao_plugin_directory
   ansible.builtin.assert:
     that:

@@ -15,18 +15,15 @@
     group: root
     mode: "{{ openbao_download_dir_mode }}"
 
-# Download OpenBao GPG key with SSL verification disabled to handle
-# older Ubuntu versions (Focal, Jammy) with outdated CA certificates
 - name: Download OpenBao GPG key
   ansible.builtin.get_url:
     url: "{{ openbao_gpg_key_url }}"
     dest: "{{ openbao_gpg_key_path }}"
     mode: "0644"
-    validate_certs: "{{ openbao_validate_gpg_ssl }}"
 
 - name: Import OpenBao GPG key (apt)
   when:
-    - ansible_pkg_mgr in [ "apt" ]
+    - ansible_pkg_mgr == "apt"
   block:
     - name: Install gnupg
       ansible.builtin.package:
@@ -50,28 +47,29 @@
   when:
     - ansible_pkg_mgr in [ "dnf", "dnf5", "yum" ]
 
-- name: Download OpenBao package
-  ansible.builtin.get_url:
-    url: "{{ openbao_package_url }}"
-    dest: "{{ openbao_local_pkg }}"
-    mode: "0644"
-    validate_certs: "{{ openbao_validate_gpg_ssl }}"
-
-- name: Install OpenBao (apt-based)
-  ansible.builtin.apt:
-    deb: "{{ openbao_local_pkg }}"
+- name: Configure OpenBao APT repository
+  ansible.builtin.apt_repository:
+    repo: "{{ openbao_apt_repository }}"
+    filename: "openbao"
     state: present
   when:
-    - ansible_pkg_mgr in [ "apt" ]
-  notify:
-    - Restart OpenBao
+    - ansible_pkg_mgr == "apt"
 
-- name: Install OpenBao (rpm-based)
-  ansible.builtin.dnf:
-    name: "{{ openbao_local_pkg }}"
-    state: present
+- name: Configure OpenBao YUM repository
+  ansible.builtin.yum_repository:
+    name: openbao
+    description: OpenBao repository
+    baseurl: "{{ openbao_yum_repository_baseurl }}"
+    gpgcheck: "{{ openbao_yum_repository_gpgkey | length > 0 }}"
+    gpgkey: "{{ openbao_yum_repository_gpgkey | default(omit) }}"
+    enabled: true
   when:
     - ansible_pkg_mgr in [ "dnf", "dnf5", "yum" ]
+
+- name: Install OpenBao package
+  ansible.builtin.package:
+    name: "{{ openbao_package_name }}"
+    state: present
   notify:
     - Restart OpenBao
 

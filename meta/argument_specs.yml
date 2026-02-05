@@ -9,16 +9,12 @@ argument_specs:
       openbao_version:
         type: "str"
         required: false
-        default: "2.3.2"
-        description: "Version of OpenBao to install (e.g., '2.3.2')."
+        default: "2.5.0"
+        description: "Package version of OpenBao to install (e.g., '2.5.0'). The role will request this version from the configured package repository."
       openbao_download_dir:
         type: "str"
         default: "/tmp"
-        description: "Directory to store the downloaded package before installation."
-      openbao_validate_gpg_ssl:
-        type: "bool"
-        default: false
-        description: "Whether to validate SSL certificates when downloading the GPG key. Set to false to handle older Ubuntu versions with outdated CA certificates."
+        description: "Directory to store temporary downloaded artifacts (for example, plugin archives)."
       openbao_ui:
         type: "bool"
         default: true
