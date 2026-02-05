@@ -16,6 +16,13 @@
       - openbao_download_dir | length > 0
     quiet: true
 
+- name: assert | Test openbao_validate_certs
+  ansible.builtin.assert:
+    that:
+      - openbao_validate_certs is defined
+      - openbao_validate_certs is boolean
+    quiet: true
+
 - name: assert | Test openbao_ui
   ansible.builtin.assert:
     that:

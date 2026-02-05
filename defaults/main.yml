@@ -11,6 +11,11 @@ openbao_version: "2.5.0"
 # plugin archives). This directory is created before any downloads.
 openbao_download_dir: "/tmp"
 
+# Whether to validate TLS certificates when downloading the OpenBao
+# GPG key. When false, TLS certificate validation is disabled
+# (insecure; use only in controlled environments).
+openbao_validate_certs: false
+
 # Enable or disable the OpenBao web UI. When true, the UI will be
 # accessible at the configured listener address.
 openbao_ui: true

@@ -20,6 +20,7 @@
     url: "{{ openbao_gpg_key_url }}"
     dest: "{{ openbao_gpg_key_path }}"
     mode: "0644"
+    validate_certs: "{{ openbao_validate_certs }}"
 
 - name: Import OpenBao GPG key (apt)
   when:

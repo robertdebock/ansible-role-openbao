@@ -15,6 +15,11 @@ argument_specs:
         type: "str"
         default: "/tmp"
         description: "Directory to store temporary downloaded artifacts (for example, plugin archives)."
+      openbao_validate_certs:
+        type: "bool"
+        required: false
+        default: false
+        description: "Whether to validate TLS certificates when downloading the OpenBao GPG key. When false, TLS errors are ignored (insecure; use only in controlled environments)."
       openbao_ui:
         type: "bool"
         default: true
