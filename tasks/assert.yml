@@ -716,13 +716,6 @@
       - openbao_service_environment is mapping
     quiet: true
 
-- name: assert | Test openbao_service_environment_persist
-  ansible.builtin.assert:
-    that:
-      - openbao_service_environment_persist is defined
-      - openbao_service_environment_persist is boolean
-    quiet: true
-
 - name: assert | Test openbao_audit_directories_mode
   ansible.builtin.assert:
     that:

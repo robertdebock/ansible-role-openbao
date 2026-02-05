@@ -593,11 +593,6 @@ argument_specs:
         required: false
         default: {}
         description: "Environment variables injected into openbao.env"
-      openbao_service_environment_persist:
-        type: "bool"
-        required: false
-        default: false
-        description: "Whether to persist the environment file to disk after OpenBao reads it. When false, the file is deleted after initialization."
       openbao_plugin_directory:
         type: "str"
         required: false

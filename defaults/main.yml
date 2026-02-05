@@ -389,13 +389,6 @@ openbao_initialize: []
 #   INITIAL_ADMIN_PASSWORD: "changeme"
 openbao_service_environment: {}
 
-# Whether to persist the environment file to disk after OpenBao reads it.
-# When false (default), the file /etc/openbao/openbao.env is deleted after
-# OpenBao starts and initialization completes, removing sensitive values from disk.
-# When true, the file persists (for backward compatibility).
-# Set to true if you need the environment variables to persist across service restarts.
-openbao_service_environment_persist: false
-
 # Plugin installation for OpenBao.
 # This role can download and install plugin binaries and set the
 # plugin_directory in the OpenBao configuration. Registration/enabling

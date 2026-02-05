@@ -50,12 +50,3 @@
     state: started
   when:
     - openbao_service_environment | length > 0
-    - not openbao_service_environment_persist
-
-- name: self_init | Remove environment file after initialization (non-persistent)
-  ansible.builtin.file:
-    path: /etc/openbao/openbao.env
-    state: absent
-  when:
-    - openbao_service_environment | length > 0
-    - not openbao_service_environment_persist
