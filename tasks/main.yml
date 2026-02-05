@@ -24,7 +24,7 @@
 
 - name: Import OpenBao GPG key (apt)
   when:
-    - ansible_pkg_mgr == "apt"
+    - ansible_facts['pkg_mgr'] == "apt"
   block:
     - name: Install gnupg
       ansible.builtin.package:
@@ -46,7 +46,7 @@
     key: "{{ openbao_gpg_key_path }}"
     state: present
   when:
-    - ansible_pkg_mgr in [ "dnf", "dnf5", "yum" ]
+    - ansible_facts['pkg_mgr'] in [ "dnf", "dnf5", "yum" ]
 
 - name: Configure OpenBao APT repository
   ansible.builtin.apt_repository:
@@ -54,7 +54,7 @@
     filename: "openbao"
     state: present
   when:
-    - ansible_pkg_mgr == "apt"
+    - ansible_facts['pkg_mgr'] == "apt"
 
 - name: Configure OpenBao YUM repository
   ansible.builtin.yum_repository:
@@ -65,7 +65,7 @@
     gpgkey: "{{ openbao_yum_repository_gpgkey | default(omit) }}"
     enabled: true
   when:
-    - ansible_pkg_mgr in [ "dnf", "dnf5", "yum" ]
+    - ansible_facts['pkg_mgr'] in [ "dnf", "dnf5", "yum" ]
 
 - name: Install OpenBao package
   ansible.builtin.package:

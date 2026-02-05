@@ -16,7 +16,7 @@ _openbao_package_name:
   default: "openbao-{{ openbao_version }}"
   apt: "openbao={{ openbao_version }}"
 
-openbao_package_name: "{{ _openbao_package_name[ansible_pkg_mgr] | default(_openbao_package_name['default']) }}"
+openbao_package_name: "{{ _openbao_package_name[ansible_facts['pkg_mgr']] | default(_openbao_package_name['default']) }}"
 
 # Determine directory mode based on path
 # /tmp requires 1777 (sticky bit) to work properly with apt and other tools
