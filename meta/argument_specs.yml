@@ -489,6 +489,11 @@ argument_specs:
                   - tcp
                   - udp
                 description: "Socket type for socket audit device."
+      openbao_audit_directories_mode:
+        type: "str"
+        required: false
+        default: "0750"
+        description: "File mode (as string) for directories that hold file-based audit logs."
       openbao_tls:
         type: "dict"
         required: false

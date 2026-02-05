@@ -722,3 +722,11 @@
       - openbao_service_environment_persist is defined
       - openbao_service_environment_persist is boolean
     quiet: true
+
+- name: assert | Test openbao_audit_directories_mode
+  ansible.builtin.assert:
+    that:
+      - openbao_audit_directories_mode is defined
+      - openbao_audit_directories_mode is string
+      - openbao_audit_directories_mode | length > 0
+    quiet: true

@@ -411,6 +411,11 @@ openbao_log_requests_level: "info"
 #       log_raw: false
 openbao_audit_devices: []
 
+# File mode used for directories that hold file-based audit logs.
+# The role always creates the parent directory of each file_path from
+# file-type entries in openbao_audit_devices with this mode.
+openbao_audit_directories_mode: "0750"
+
 # TLS certificate management for OpenBao.
 # When this map is populated, the role will manage TLS certificates.
 # Leave empty to skip certificate management.

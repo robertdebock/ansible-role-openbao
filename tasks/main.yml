@@ -242,6 +242,22 @@
   when:
     - openbao_storage.type in [ 'file', 'raft' ]
 
+- name: Ensure audit log directories exist for file audit devices
+  ansible.builtin.file:
+    path: "{{ item.options.file_path | dirname }}"
+    state: directory
+    owner: openbao
+    group: openbao
+    mode: "{{ openbao_audit_directories_mode }}"
+  loop: "{{ openbao_audit_devices }}"
+  loop_control:
+    label: "{{ item.options.file_path | dirname | default('') }}"
+  when:
+    - openbao_audit_devices | length > 0
+    - item.type == 'file'
+    - item.options is defined
+    - item.options.file_path is defined
+
 - name: Configure OpenBao (without orchestration)
   ansible.builtin.template:
     src: openbao.hcl.j2
