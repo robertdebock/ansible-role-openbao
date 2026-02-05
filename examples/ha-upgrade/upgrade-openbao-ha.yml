@@ -1,0 +1,170 @@
+---
+# Example playbook to upgrade an OpenBao HA cluster using the
+# robertdebock.openbao role, following the documented procedure:
+# https://openbao.org/docs/upgrading/ha-upgrade/
+#
+# The sequence is:
+# 1. Detect which node is currently active (leader) and which are followers.
+# 2. Upgrade all follower nodes one at a time.
+# 3. Upgrade the active node last.
+#
+# Run this playbook from the examples/ha-upgrade directory:
+#   ansible-playbook upgrade-openbao-ha.yml
+#
+# Before running:
+# - Adapt inventory/hosts.yml to your environment.
+# - Set a real token in group_vars/all/openbao.yml (openbao_admin_token).
+# - Adjust openbao_version in group_vars/all/openbao.yml to the desired version.
+# - Configure openbao_seal in group_vars/all/openbao.yml for auto-unseal, or
+#   manually unseal nodes after they start (if using Shamir's secret sharing).
+
+- name: Detect OpenBao HA role on all nodes
+  hosts: openbao_cluster
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Read bao status in JSON
+      ansible.builtin.command:
+        argv:
+          - bao
+          - status
+          - -format=json
+      environment:
+        BAO_ADDR: "{{ openbao_api_addr }}"
+      register: openbao_status_command
+      changed_when: false
+
+    - name: Parse bao status JSON
+      ansible.builtin.set_fact:
+        openbao_status: "{{ openbao_status_command.stdout | from_json }}"
+
+    - name: Determine HA mode and leader flag
+      ansible.builtin.set_fact:
+        openbao_ha_mode: "{{ openbao_status.ha_mode | default('standby') }}"
+        openbao_is_leader: "{{ (openbao_status.ha_mode | default('standby')) == 'active' }}"
+
+    - name: Add host to leader group when active
+      ansible.builtin.group_by:
+        key: openbao_role_leader
+      when:
+        - openbao_is_leader | default(false)
+
+    - name: Add host to follower group when not leader
+      ansible.builtin.group_by:
+        key: openbao_role_follower
+      when:
+        - not (openbao_is_leader | default(false))
+
+- name: Upgrade OpenBao on follower nodes
+  hosts: openbao_role_follower
+  become: true
+  gather_facts: false
+  serial: 1
+  any_errors_fatal: true
+
+  tasks:
+    - name: Stop OpenBao service on follower node
+      ansible.builtin.service:
+        name: openbao
+        state: stopped
+
+    - name: Upgrade OpenBao on follower node using role
+      ansible.builtin.import_role:
+        name: robertdebock.openbao
+
+    - name: Start OpenBao service on follower node
+      ansible.builtin.service:
+        name: openbao
+        state: started
+        enabled: true
+
+    - name: Wait for follower node to be upgraded and healthy
+      ansible.builtin.command:
+        argv:
+          - bao
+          - status
+          - -format=json
+      environment:
+        BAO_ADDR: "{{ openbao_api_addr }}"
+      register: openbao_status_after_upgrade
+      changed_when: false
+      retries: 30
+      delay: 2
+      until: >
+        openbao_status_after_upgrade.rc == 0 and
+        (openbao_status_after_upgrade.stdout | from_json).version is defined and
+        (openbao_status_after_upgrade.stdout | from_json).version == openbao_version and
+        (openbao_status_after_upgrade.stdout | from_json).ha_mode == 'standby'
+
+- name: Upgrade OpenBao on active leader
+  hosts: openbao_role_leader
+  become: true
+  gather_facts: false
+  any_errors_fatal: true
+
+  tasks:
+    - name: Request step-down of active leader
+      ansible.builtin.command:
+        argv:
+          - bao
+          - operator
+          - step-down
+      environment:
+        BAO_ADDR: "{{ openbao_api_addr }}"
+        BAO_TOKEN: "{{ openbao_admin_token }}"
+      changed_when: false
+
+    - name: Stop OpenBao service on leader node
+      ansible.builtin.service:
+        name: openbao
+        state: stopped
+
+    - name: Upgrade OpenBao on leader node using role
+      ansible.builtin.import_role:
+        name: robertdebock.openbao
+
+    - name: Start OpenBao service on leader node
+      ansible.builtin.service:
+        name: openbao
+        state: started
+        enabled: true
+
+    - name: Wait for leader node to be upgraded and in standby mode
+      ansible.builtin.command:
+        argv:
+          - bao
+          - status
+          - -format=json
+      environment:
+        BAO_ADDR: "{{ openbao_api_addr }}"
+      register: openbao_status_leader_after_upgrade
+      changed_when: false
+      retries: 30
+      delay: 2
+      until: >
+        openbao_status_leader_after_upgrade.rc == 0 and
+        (openbao_status_leader_after_upgrade.stdout | from_json).version is defined and
+        (openbao_status_leader_after_upgrade.stdout | from_json).version == openbao_version and
+        (openbao_status_leader_after_upgrade.stdout | from_json).ha_mode == 'standby'
+
+    - name: Verify that the cluster has an active node after upgrade
+      ansible.builtin.command:
+        argv:
+          - bao
+          - status
+          - -format=json
+      environment:
+        BAO_ADDR: "{{ openbao_api_addr }}"
+      register: openbao_cluster_status
+      changed_when: false
+      run_once: true
+
+    - name: Assert that the cluster reports an active HA mode
+      ansible.builtin.assert:
+        that:
+          - (openbao_cluster_status.stdout | from_json).ha_mode is defined
+          - (openbao_cluster_status.stdout | from_json).ha_mode == 'active'
+        success_msg: "OpenBao cluster reports active HA mode after upgrade."
+        fail_msg: "OpenBao cluster does not report active HA mode after upgrade."
+      run_once: true

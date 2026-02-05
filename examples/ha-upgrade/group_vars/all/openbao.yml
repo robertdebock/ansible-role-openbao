@@ -1,0 +1,35 @@
+---
+# Example group variables for an OpenBao HA cluster managed by the
+# robertdebock.openbao role.
+#
+# These values are intended as a starting point. Adapt them to match
+# your environment before running the example.
+
+# Version of OpenBao to install/upgrade to on all nodes.
+openbao_version: "2.5.1"
+
+# Storage backend configuration using Raft for HA.
+openbao_storage:
+  type: raft
+  path: /opt/openbao/raft
+  # In a real setup you may want a more stable identifier.
+  node_id: "{{ inventory_hostname }}"
+
+# API and cluster addresses for each node.
+openbao_api_addr: "http://{{ inventory_hostname }}:8200"
+openbao_cluster_addr: "http://{{ inventory_hostname }}:8201"
+
+# Simple TCP listener without TLS for demonstration purposes.
+# Do not use this configuration as-is in production.
+openbao_listeners:
+  - name: tcp
+    address: "0.0.0.0:8200"
+    tls_disable: true
+
+# Token used by the example upgrade playbook when calling the `bao`
+# CLI (for example, to run `bao status`).
+#
+# IMPORTANT: Replace this placeholder with a real root/admin token
+# before running the example.
+openbao_admin_token: "changeme-root-token"
+
