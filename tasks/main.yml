@@ -48,6 +48,13 @@
   when:
     - ansible_facts['pkg_mgr'] in [ "dnf", "dnf5", "yum" ]
 
+- name: Ensure CA certificates are installed (apt)
+  ansible.builtin.package:
+    name: ca-certificates
+    state: present
+  when:
+    - ansible_facts['pkg_mgr'] == "apt"
+
 - name: Configure OpenBao APT repository
   ansible.builtin.apt_repository:
     repo: "{{ openbao_apt_repository }}"
