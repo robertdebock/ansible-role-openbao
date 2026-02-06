@@ -1,6 +1,6 @@
 ---
-# Example playbook to upgrade an OpenBao HA cluster using the
-# robertdebock.openbao role, following the documented procedure:
+# Example playbook to upgrade an OpenBao HA cluster following
+# the documented procedure:
 # https://openbao.org/docs/upgrading/ha-upgrade/
 #
 # The sequence is:
@@ -15,8 +15,8 @@
 # - Adapt inventory/hosts.yml to your environment.
 # - Set a real token in group_vars/all/openbao.yml (openbao_admin_token).
 # - Adjust openbao_version in group_vars/all/openbao.yml to the desired version.
-# - Configure openbao_seal in group_vars/all/openbao.yml for auto-unseal, or
-#   manually unseal nodes after they start (if using Shamir's secret sharing).
+# The openbao nodes need to be unsealed after openbao (re-)starts. This playbook
+# assumes nodes can unseal automatically.
 
 - name: Detect OpenBao HA role on all nodes
   hosts: openbao_cluster
@@ -69,9 +69,9 @@
         name: openbao
         state: stopped
 
-    - name: Upgrade OpenBao on follower node using role
-      ansible.builtin.import_role:
-        name: robertdebock.openbao
+    - name: Upgrade OpenBao package on follower node
+      ansible.builtin.package:
+        name: "{{ openbao_package_name }}"
 
     - name: Start OpenBao service on follower node
       ansible.builtin.service:
@@ -120,9 +120,9 @@
         name: openbao
         state: stopped
 
-    - name: Upgrade OpenBao on leader node using role
-      ansible.builtin.import_role:
-        name: robertdebock.openbao
+    - name: Upgrade OpenBao package on leader node
+      ansible.builtin.package:
+        name: "{{ openbao_package_name }}"
 
     - name: Start OpenBao service on leader node
       ansible.builtin.service:
