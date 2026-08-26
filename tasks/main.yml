@@ -21,10 +21,13 @@
     dest: "{{ openbao_gpg_key_path }}"
     mode: "0644"
     validate_certs: "{{ openbao_validate_certs }}"
+  when:
+    - not _openbao_use_deb822
 
 - name: Import OpenBao GPG key (apt)
   when:
     - ansible_facts['pkg_mgr'] == "apt"
+    - not _openbao_use_deb822
   block:
     - name: Install gnupg
       ansible.builtin.package:
@@ -55,13 +58,26 @@
   when:
     - ansible_facts['pkg_mgr'] == "apt"
 
-- name: Configure OpenBao APT repository
+- name: Configure OpenBao APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: openbao
+    types: deb
+    uris: "{{ openbao_deb822_uris }}"
+    suites: "{{ openbao_deb822_suites }}"
+    components: "{{ openbao_deb822_components }}"
+    signed_by: "{{ openbao_gpg_key_url }}"
+    state: present
+  when:
+    - _openbao_use_deb822
+
+- name: Configure OpenBao APT repository (legacy)
   ansible.builtin.apt_repository:
     repo: "{{ openbao_apt_repository }}"
     filename: "openbao"
     state: present
   when:
     - ansible_facts['pkg_mgr'] == "apt"
+    - not _openbao_use_deb822
 
 - name: Configure OpenBao YUM repository
   ansible.builtin.yum_repository:
