@@ -48,7 +48,7 @@ The default values for the variables are set in [`defaults/main.yml`](https://gi
 # Version of OpenBao to install. This value is used to select the
 # package version from your configured package repositories.
 # Example: "2.5.0"
-openbao_version: "2.5.0"
+openbao_version: "2.6.2"
 
 # Directory to store temporary downloaded artifacts (for example,
 # plugin archives). This directory is created before any downloads.
