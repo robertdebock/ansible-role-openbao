@@ -1,0 +1,15 @@
+---
+- name: repository_apt_deb822 | Ensure CA certificates are installed
+  ansible.builtin.package:
+    name: ca-certificates
+    state: present
+
+- name: repository_apt_deb822 | Configure OpenBao APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: openbao
+    types: deb
+    uris: "{{ openbao_deb822_uris }}"
+    suites: "{{ openbao_deb822_suites }}"
+    components: "{{ openbao_deb822_components }}"
+    signed_by: "{{ openbao_gpg_key_url }}"
+    state: present

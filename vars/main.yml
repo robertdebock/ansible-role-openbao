@@ -5,8 +5,12 @@
 openbao_gpg_key_url: "https://openbao.org/assets/openbao-gpg-pub-20240618.asc"
 openbao_gpg_key_path: "{{ openbao_download_dir.rstrip('/') + '/openbao_public_key.asc' }}"
 
-# Whether to use the deb822 repository format. Enabled on Debian 13 and later.
-_openbao_use_deb822: "{{ ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int >= 13 }}"
+# Select the APT repository task file by distribution and major version.
+_openbao_apt_repository_tasks:
+  default: repository_apt_legacy.yml
+  true: repository_apt_deb822.yml
+
+openbao_apt_repository_tasks: "{{ _openbao_apt_repository_tasks[((ansible_facts['distribution'] == 'Debian') and (ansible_facts['distribution_major_version'] | int >= 13)) | string | lower] | default(_openbao_apt_repository_tasks['default']) }}"
 
 # Legacy one-line APT repository (used on Debian < 13 and other apt-based distros).
 openbao_apt_repository: "deb [signed-by=/usr/share/keyrings/openbao-archive-keyring.gpg] https://pkgs.openbao.org/deb stable main"

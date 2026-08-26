@@ -22,27 +22,7 @@
     mode: "0644"
     validate_certs: "{{ openbao_validate_certs }}"
   when:
-    - not _openbao_use_deb822
-
-- name: Import OpenBao GPG key (apt)
-  when:
-    - ansible_facts['pkg_mgr'] == "apt"
-    - not _openbao_use_deb822
-  block:
-    - name: Install gnupg
-      ansible.builtin.package:
-        name: gnupg2
-
-    - name: Import OpenBao GPG key (apt) - modern method
-      ansible.builtin.shell: |
-        gpg --dearmor -o /usr/share/keyrings/openbao-archive-keyring.gpg {{ openbao_gpg_key_path }}
-      args:
-        creates: /usr/share/keyrings/openbao-archive-keyring.gpg
-  rescue:
-    - name: Import OpenBao GPG key (apt) - legacy method
-      ansible.builtin.apt_key:
-        file: "{{ openbao_gpg_key_path }}"
-        state: present
+    - ansible_facts['pkg_mgr'] in [ "dnf", "dnf5", "yum" ]
 
 - name: Import OpenBao GPG key (dnf/dnf5/yum)
   ansible.builtin.rpm_key:
@@ -52,33 +32,10 @@
     - ansible_facts['pkg_mgr'] in [ "dnf", "dnf5", "yum" ]
 
 - name: Configure OpenBao APT repository
+  ansible.builtin.include_tasks:
+    file: "{{ openbao_apt_repository_tasks }}"
   when:
     - ansible_facts['pkg_mgr'] == "apt"
-  block:
-    - name: Ensure CA certificates are installed
-      ansible.builtin.package:
-        name: ca-certificates
-        state: present
-
-    - name: Configure OpenBao APT repository (deb822)
-      ansible.builtin.deb822_repository:
-        name: openbao
-        types: deb
-        uris: "{{ openbao_deb822_uris }}"
-        suites: "{{ openbao_deb822_suites }}"
-        components: "{{ openbao_deb822_components }}"
-        signed_by: "{{ openbao_gpg_key_url }}"
-        state: present
-      when:
-        - _openbao_use_deb822
-
-    - name: Configure OpenBao APT repository (legacy)
-      ansible.builtin.apt_repository:
-        repo: "{{ openbao_apt_repository }}"
-        filename: "openbao"
-        state: present
-      when:
-        - not _openbao_use_deb822
 
 - name: Configure OpenBao YUM repository
   ansible.builtin.yum_repository:

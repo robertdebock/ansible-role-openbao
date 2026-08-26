@@ -1,0 +1,35 @@
+---
+- name: repository_apt_legacy | Download OpenBao GPG key
+  ansible.builtin.get_url:
+    url: "{{ openbao_gpg_key_url }}"
+    dest: "{{ openbao_gpg_key_path }}"
+    mode: "0644"
+    validate_certs: "{{ openbao_validate_certs }}"
+
+- name: repository_apt_legacy | Import OpenBao GPG key (apt)
+  block:
+    - name: repository_apt_legacy | Install gnupg
+      ansible.builtin.package:
+        name: gnupg2
+
+    - name: repository_apt_legacy | Import OpenBao GPG key (apt) - modern method
+      ansible.builtin.shell: |
+        gpg --dearmor -o /usr/share/keyrings/openbao-archive-keyring.gpg {{ openbao_gpg_key_path }}
+      args:
+        creates: /usr/share/keyrings/openbao-archive-keyring.gpg
+  rescue:
+    - name: repository_apt_legacy | Import OpenBao GPG key (apt) - legacy method
+      ansible.builtin.apt_key:
+        file: "{{ openbao_gpg_key_path }}"
+        state: present
+
+- name: repository_apt_legacy | Ensure CA certificates are installed
+  ansible.builtin.package:
+    name: ca-certificates
+    state: present
+
+- name: repository_apt_legacy | Configure OpenBao APT repository (legacy)
+  ansible.builtin.apt_repository:
+    repo: "{{ openbao_apt_repository }}"
+    filename: "openbao"
+    state: present
